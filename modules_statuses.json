@@ -1,0 +1,7 @@
+{
+    "Core": true,
+    "Members": true,
+    "Inventory": true,
+    "Finance": true,
+    "Commerce": true
+}
