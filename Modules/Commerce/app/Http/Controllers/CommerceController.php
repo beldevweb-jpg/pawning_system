@@ -21,26 +21,36 @@ class CommerceController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create_type_of_sale(Request $request)
+
+    public function create_type_of_sale()
     {
-        $request->validate([
-            'service' => 'required|string',
-            'pawning' => 'nullable|string',
-            'sale'    => 'nullable|string',
-        ]);
-
-        DB::transaction(function () use ($request) {
-            Sale::create([
-                'service' => $request->service,
-                'pawning' => $request->pawning,
-                'sale'    => $request->sale,
-            ]);
-        });
-
-        return redirect()->route('commerce.create_pawning');
+        return view('commerce::commerce.create_type_of_sale');
     }
 
-    public function crate_pawming(Request $request)
+    public function create_pawning()
+    {
+        return view('commerce::commerce.create_pawning',);
+    }
+
+
+    public function store_create_type_of_sale(Request $request)
+    {
+        $request->validate([
+            'type' => 'required|in:pawn,counter,service',
+        ]);
+
+        $type_serve = $request->type;
+
+        $sale = new Sale();
+        // dd($type_serve);
+        $sale->type_serve = $type_serve;
+        $sale->save();
+
+        return redirect()->route('commerce.create_pawning')
+            ->with('success', 'บันทึกรายการจำนำเรียบร้อย');
+    }
+
+    public function store_crate_pawming(Request $request)
     {
         $request->validate([
 
@@ -53,20 +63,19 @@ class CommerceController extends Controller
         ]);
 
         DB::transaction(function () use ($request) {
-            Sale::create([
-                'members' => $request->members,
-                'phone' => $request->phone,
-                'tax_number' => $request->tax_number,
-                'type_serve' => $request->type_serve,
-                'type_category' => $request->type_category,
-                'brand' => $request->brand,
-                'model' => $request->model,
-                'serial_number' => $request->serial_number,
-                'description' => $request->description,
-                'price' => $request->price,
-                'others' => $request->others,
-                // 'user' => auth()->id(),
-            ]);
+            $sale = new Sale();
+            $sale->members = $request->members;
+            $sale->phone = $request->phone;
+            $sale->tax_number = $request->tax_number;
+            $sale->type_serve = $request->type_serve;
+            $sale->type_category = $request->type_category;
+            $sale->brand = $request->brand;
+            $sale->model = $request->model;
+            $sale->serial_number = $request->serial_number;
+            $sale->description = $request->description;
+            $sale->price = $request->price;
+            $sale->others = $request->others;
+            $sale->save();
         });
 
         return redirect()->route('commerce.report_pawming')
