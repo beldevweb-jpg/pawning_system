@@ -1,262 +1,162 @@
-@import url('https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600&display=swap');
 
-/* Reset */
 * {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
   font-family: "Kanit", sans-serif;
 }
 
-/* Body */
 body {
   background: linear-gradient(180deg, #f4f9ff, #eef5ff);
-  min-height: 100vh;
-  color: #2c3e50;
-  padding: 48px;
-}
-
-/* Layout */
-.container {
-  max-width: 1100px;
-  margin: auto;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 40px;
-  margin-bottom: 60px; /* ⭐ สำคัญ */
-}
-
-
-/* Header title */
-h2 {
-  text-align: center;
-  margin-bottom: 28px;
-  font-size: 26px;
-  font-weight: 500;
-  color: #2f4f7f;
-}
-
-/* Options */
-.option {
-  display: flex;
-  align-items: center;
-  font-size: 22px;
-  margin-bottom: 18px;
-  cursor: pointer;
-  color: #2c3e50;
-}
-
-/* Radio */
-.option input {
-  width: 22px;
-  height: 22px;
-  margin-right: 14px;
-  accent-color: #4a90e2; /* ฟ้า */
-}
-
-/* Input */
-.input {
-  width: 100%;
-  height: 56px;
-  margin-top: 12px;
-  padding: 0 24px;
-  border-radius: 28px;
-  border: none;
-  font-size: 20px;
-  background: #ffffff;
-}
-
-/* Disabled input */
-.input:disabled {
-  background: #dfeaff;
-  color: #7a8ca3;
-  cursor: not-allowed;
-}
-
-/* Responsive */
-@media (max-width: 900px) {
-  .container {
-    grid-template-columns: 1fr;
-  }
-}
-
-* {
-  box-sizing: border-box;
-  font-family: 'Prompt', sans-serif;
-}
-
-body {
   margin: 0;
-  background: linear-gradient(180deg, #eef4ff, #e6efff);
-  min-height: 100vh;
-  color: #2c3e50;
 }
 
-/* ===== HEADER ===== */
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 14px 20px;
+  padding: 16px 20px;
 }
 
-.user {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 500;
-}
-
-.avatar {
-  background: #e3ecff;
-  border-radius: 50%;
-  padding: 6px 8px;
-}
-
-.logout {
-  background: #ffffff;
-  border: none;
-  padding: 6px 14px;
-  border-radius: 20px;
-  cursor: pointer;
-  color: #2b6cff;
-  font-weight: 500;
-}
-
-/* ===== TITLE ===== */
 .title {
   text-align: center;
-  margin: 10px 0 20px;
-  font-size: 32px;
-  font-weight: 600;
-  color: #2d4f9c;
+  margin: 20px 0 28px;
 }
 
-/* ===== CARD ===== */
+.container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 0 20px 80px;
+  display: grid;
+  gap: 32px;
+}
+
 .card {
-  background: linear-gradient(180deg, #f9fbff, #f1f6ff);
+  background: #fff;
   border-radius: 24px;
   padding: 24px;
-  margin: 0 auto 32px;   /* ⭐ เพิ่มระยะห่างด้านล่าง */
-  width: 90%;
-  max-width: 680px;
-  box-shadow: 0 10px 25px rgba(70, 120, 255, 0.12);
+  max-width: 720px;
+  margin: auto;
+  box-shadow: 0 10px 24px rgba(0,0,0,.1);
 }
 
-
-/* ===== CATEGORY ===== */
-.category-box {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
+.option {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
-.category-btn {
-  background: linear-gradient(180deg, #e7efff, #dbe7ff);
-  border-radius: 18px;
-  padding: 18px 0;
-  text-align: center;
-  font-weight: 500;
-  cursor: pointer;
+.input {
+  width: 100%;
+  height: 48px;
+  margin-top: 8px;
+  padding: 0 16px;
+  border-radius: 24px;
+  border: none;
 }
 
-.category-btn.long {
-  grid-column: span 3;
-  background: #ffffff;
-  color: #7a8dbb;
-}
-
-/* ===== SECTION ===== */
-.section-title {
-  text-align: center;
-  margin-bottom: 18px;
-  font-size: 18px;
-  font-weight: 500;
-  color: #3a5edc;
-}
-
-/* ===== FORM ===== */
 .form-row {
-  display: grid;
-  grid-template-columns: 140px 1fr;
-  align-items: center;
-  margin-bottom: 14px;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .form-row label {
-  font-size: 14px;
-  color: #4a5f8c;
+  min-width: 120px;
 }
 
 .form-row input {
-  border: none;
-  background: #ffffff;
-  border-radius: 20px;
-  padding: 10px 14px;
-  font-size: 14px;
-  outline: none;
-  box-shadow: inset 0 0 0 1px #dde6ff;
-}
-
-.form-row input:focus {
-  box-shadow: inset 0 0 0 2px #4d7cff;
-}
-
-/* ===== RESPONSIVE ===== */
-@media (max-width: 480px) {
-  .form-row {
-    grid-template-columns: 1fr;
-    gap: 6px;
-  }
-
-  .category-box {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .category-btn.long {
-    grid-column: span 2;
-  }
-}
-
-.category-btn.active {
-  background: linear-gradient(180deg, #ff6b6b, #ff4d4d);
-  color: #fff;
-}
-
-.category-input:disabled {
-  background: #f1f4fb;
-  color: #9aa6c4;
-  cursor: not-allowed;
-}
-
-.category-box {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  position: relative;
+  flex: 1;
+  border-radius: 16px;
+  padding: 10px;
 }
 
 .submit {
+  max-width: 720px;
+  margin: auto;
   display: flex;
-  justify-content: space-between;
   gap: 16px;
-  width: 90%;
-  max-width: 680px;
-  margin: 40px auto 0; /* ⭐ แยกจาก card ชัด */
 }
 
 .submit button {
   flex: 1;
-  height: 52px;
-  border-radius: 26px;
+  height: 48px;
+  border-radius: 24px;
   border: none;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
 }
 
-/* ปุ่มยกเลิก */
+/* 📱 Mobile */
+@media (max-width: 480px) {
+  .container { padding: 0 12px 60px; }
+  .card { padding: 18px; }
+  .form-row { flex-direction: column; }
+  .submit { flex-direction: column; }
+}
+
+/* 📲 Tablet */
+@media (min-width: 481px) and (max-width: 900px) {
+  .container { max-width: 900px; }
+}
+
+/* ===== COLOR THEME (PAWNING STYLE) ===== */
+
+/* background */
+body {
+  background: linear-gradient(180deg, #f4f9ff, #eef5ff);
+  color: #2c3e50;
+}
+
+/* header */
+.header {
+  background: transparent;
+}
+
+.avatar {
+  background: #e3ecff;
+}
+
+.logout {
+  background: #ffffff;
+  color: #2b6cff;
+}
+
+/* title */
+.title {
+  color: #2d4f9c;
+}
+
+/* card */
+.card {
+  background: linear-gradient(180deg, #f9fbff, #f1f6ff);
+  box-shadow: 0 10px 25px rgba(70, 120, 255, 0.12);
+}
+
+/* card title */
+.card h2,
+.section-title {
+  color: #2f4f7f;
+}
+
+/* option (radio) */
+.option {
+  color: #2c3e50;
+}
+
+.option input {
+  accent-color: #4a90e2;
+}
+
+/* input */
+.input,
+.form-row input {
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px #dde6ff;
+}
+
+.input:disabled {
+  background: #dfeaff;
+  color: #7a8ca3;
+}
+
+/* submit area */
 .submit button[name="cancel"] {
   background: #eef3ff;
   color: #4a6edc;
@@ -266,14 +166,81 @@ body {
   background: #dfe9ff;
 }
 
-/* ปุ่มถัดไป */
 .submit button[name="next"] {
   background: linear-gradient(180deg, #4d7cff, #3b66e6);
   color: #ffffff;
 }
 
 .submit button[name="next"]:hover {
-  transform: translateY(-1px);
   box-shadow: 0 8px 18px rgba(77, 124, 255, 0.35);
 }
+
+/* ===== FIX PC LAYOUT BUG ===== */
+@media (min-width: 1024px) {
+  .container {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+
+  .card {
+    max-width: none;      /* ❗ สำคัญ */
+    width: 100%;
+  }
+
+  .submit {
+    grid-column: span 2;
+    max-width: 600px;
+    margin: 40px auto 0;
+  }
+  /* ===== FIX SUBMIT BUTTON PC BUG ===== */
+.submit {
+  display: flex;
+  justify-content: center;   
+  align-items: center;
+  gap: 20px;
+}
+
+.submit button {
+  flex: none;                
+  min-width: 180px;          
+  height: 48px;
+  padding: 0 24px;
+  border-radius: 24px;
+  white-space: nowrap;
+}
+
+@media (min-width: 1024px) {
+  .submit {
+    justify-content: space-between;
+    max-width: 480px;
+    margin: 40px auto 0;
+  }
+
+  .submit button {
+    min-width: 200px;
+  }
+}
+
+}
+
+.option-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px 20px;
+}
+
+/* tablet */
+@media (max-width: 768px) {
+  .option-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* mobile */
+@media (max-width: 480px) {
+  .option-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 
