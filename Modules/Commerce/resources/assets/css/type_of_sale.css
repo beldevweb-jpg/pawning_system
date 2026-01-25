@@ -1,0 +1,98 @@
+@import url('https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Kanit", sans-serif;
+}
+
+/* Body */
+body {
+  background: linear-gradient(180deg, #f4f9ff, #eef5ff);
+  min-height: 100vh;
+  color: #2c3e50;
+}
+
+/* Header */
+.header {
+  height: 64px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7fbfff, #a6d4ff);
+}
+
+.username {
+  font-weight: 500;
+}
+
+/* Logout */
+.logout {
+  background: #eaf3ff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  color: #3a7bd5;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+/* Main */
+.container {
+  max-width: 420px;
+  margin: 40px auto;
+  padding: 0 16px;
+  text-align: center;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 600;
+  margin-bottom: 32px;
+  color: #3b5b8a;
+}
+
+/* Card */
+.menu-card {
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 28px 20px;
+  box-shadow: 0 20px 40px rgba(59, 91, 138, 0.12);
+}
+
+/* Menu Item */
+.menu-item {
+  background: linear-gradient(180deg, #edf5ff, #e3efff);
+  border-radius: 22px;
+  padding: 28px;
+  font-size: 18px;
+  font-weight: 500;
+  color: #2f4f7f;
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: 0.25s ease;
+    box-shadow:
+    0 8px 16px rgba(0, 0, 0, 0.08),
+    0 16px 32px rgba(47, 79, 127, 0.15);
+}
+
+.menu-item:last-child {
+  margin-bottom: 0;
+}
