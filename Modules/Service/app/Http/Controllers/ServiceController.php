@@ -1,19 +1,18 @@
 <?php
 
-namespace Modules\Commerce\Http\Controllers;
+namespace Modules\Service\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class CommerceController extends Controller
+class ServiceController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        
-        return view('commerce::index');
+        return view('service::index');
     }
 
     /**
@@ -21,7 +20,7 @@ class CommerceController extends Controller
      */
     public function create()
     {
-        return view('commerce::create');
+        return view('service::create');
     }
 
     /**
@@ -34,7 +33,7 @@ class CommerceController extends Controller
      */
     public function show($id)
     {
-        return view('commerce::show');
+        return view('service::show');
     }
 
     /**
@@ -42,7 +41,7 @@ class CommerceController extends Controller
      */
     public function edit($id)
     {
-        return view('commerce::edit');
+        return view('service::edit');
     }
 
     /**

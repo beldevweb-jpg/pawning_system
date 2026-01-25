@@ -3,5 +3,6 @@
     "Members": true,
     "Inventory": true,
     "Finance": true,
-    "Commerce": true
+    "Commerce": true,
+    "Service": true
 }
