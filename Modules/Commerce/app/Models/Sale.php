@@ -14,6 +14,7 @@ class Sale extends Model
      * The attributes that are mass assignable.
      */
     protected $fillable = [];
+    protected $tabel = 'sale';
 
     // protected static function newFactory(): SaleFactory
     // {

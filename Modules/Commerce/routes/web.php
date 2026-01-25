@@ -9,4 +9,7 @@ use Modules\Commerce\Http\Controllers\CommerceController;
 
 Route::group([], function () {
     Route::get('/commerce', [CommerceController::class, 'index'])->name('commerce.index');
+    Route::get('/sels', [CommerceController::class, 'index'])->name('sels.create_seles');
+    Route::Post('/create_type', [CommerceController::class, 'create_type'])->name('commerce.create_type');
+    Route::Post('/create_pawning', [CommerceController::class, 'create_pawning'])->name('commerce.create_pawning');
 });
