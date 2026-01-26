@@ -18,21 +18,47 @@ class CommerceController extends Controller
         return view('commerce::index');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    public function create_search()
+    {
+        return view('commerce::commerce.create_search');
+    }
 
+    // ค้นหาประวัติการขาย
+    public function store_create_search(request $request)
+    {
+        $phone = $request->phone;
+        $serial = $request->serial;
+
+        $sales = Sale::where('serial_number', $serial)
+            ->orWhere('phone', $phone)
+            ->get();
+        if ($sales->isEmpty()) {
+            return redirect()->route('commerce.create_type_of_sale')->with('error', 'ไม่พบข้อมูลที่ค้นหา');
+        } else {
+            return view('commerce::commerce.customer', compact('sales'));
+        }
+    }
+
+    // แสดงหน้าลูกค้า
+    public function customer()
+    {
+        return view('commerce::commerce.customer');
+    }
+
+    // ฟอร์มแสดงประเป็นการขาย
     public function create_type_of_sale()
     {
         return view('commerce::commerce.create_type_of_sale');
     }
 
+    // ฟอร์มแสดงการจำนำ
     public function create_pawning()
     {
         return view('commerce::commerce.create_pawning',);
     }
 
 
+    // เพิ่มประเภทการขาย
     public function store_create_type_of_sale(Request $request)
     {
         $request->validate([
@@ -50,6 +76,7 @@ class CommerceController extends Controller
             ->with('success', 'บันทึกรายการจำนำเรียบร้อย');
     }
 
+    // เพิ่มข้อมูลจำนำ
     public function store_crate_pawming(Request $request)
     {
         $request->validate([
@@ -81,6 +108,12 @@ class CommerceController extends Controller
         return redirect()->route('commerce.report_pawming')
             ->with('success', 'บันทึกรายการจำนำเรียบร้อย');
     }
+
+    public function report_pawning_confirm()
+    {
+        return view('commerce::commerce.report_pawning_confirm');
+    }
+
     /**
      * Store a newly created resource in storage.
      */

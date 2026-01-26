@@ -10,7 +10,6 @@
 </head>
 
 <body>
-
     <header class="header">
         <div class="user-info">
             <div class="avatar"></div>
@@ -19,6 +18,16 @@
         </div>
         <button class="logout">ออกจากระบบ</button>
     </header>
+    {{-- แสดงข้อผิดพลาด --}}
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
     <main class="container">
         <h1 class="title">โอ๋ โมบาย</h1>
