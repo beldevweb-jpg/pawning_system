@@ -45,18 +45,28 @@
                 <label>ชื่อ-นามสกุล</label>
                 <input>
             </div>
-
             <div class="form-row">
                 <label>บัตรประชาชน</label>
-                <input>
+                <input
+                    type="text"
+                    inputmode="numeric"
+                    pattern="[0-9]{13}"
+                    maxlength="13"
+                    placeholder="เลขบัตรประชาชน 13 หลัก"
+                    oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+                >
             </div>
 
             <div class="form-row">
                 <label>เบอร์ติดต่อ</label>
-                <input>
-            </div>
-                <h5>ประเภทสินค้า</h5>
-        </div>
+                <input
+                    type="text"
+                    inputmode="numeric"
+                    pattern="[0-9]"
+                    maxlength="10"
+                    placeholder="เบอร์ติดต่อ"
+                    oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+                >
 
         <div class="card">
             <h2>ประเภทสินค้า</h2>
