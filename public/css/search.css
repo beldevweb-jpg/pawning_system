@@ -1,0 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600&display=swap');
+* {
+    box-sizing: border-box;
+    font-family: "Kanit", sans-serif;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: linear-gradient(180deg, #f4f9ff, #eef5ff);
+    color: #2c3e50;
+}
+
+
+/* page layout */
+
+.page {
+    max-width: 420px;
+    margin: 80px auto;
+    padding: 0 16px;
+    text-align: center;
+}
+
+
+/* title */
+
+.page-title {
+    font-size: 32px;
+    margin-bottom: 8px;
+    color: #2d4f9c;
+}
+
+.page-subtitle {
+    font-size: 14px;
+    color: #6b7da6;
+    margin-bottom: 32px;
+}
+
+
+/* card */
+
+.search-card {
+    background: linear-gradient(180deg, #ffffff, #f1f6ff);
+    border-radius: 28px;
+    padding: 28px 24px 32px;
+    box-shadow: 0 16px 40px rgba(70, 120, 255, 0.18);
+    text-align: left;
+}
+
+
+/* field */
+
+.field {
+    margin-bottom: 18px;
+}
+
+.field label {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 6px;
+    color: #415a8b;
+}
+
+.field input {
+    width: 100%;
+    height: 48px;
+    padding: 0 16px;
+    border-radius: 16px;
+    border: none;
+    font-size: 15px;
+    background: #ffffff;
+    box-shadow: inset 0 0 0 1px #dde6ff;
+}
+
+.field input:focus {
+    outline: none;
+    box-shadow: inset 0 0 0 2px #4d7cff;
+}
+
+
+/* divider */
+
+.divider {
+    text-align: center;
+    font-size: 13px;
+    color: #8aa0c8;
+    margin: 14px 0;
+}
+
+
+/* button */
+
+.search-btn {
+    width: 100%;
+    height: 52px;
+    margin-top: 20px;
+    border-radius: 26px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    color: #ffffff;
+    background: linear-gradient(180deg, #4d7cff, #3b66e6);
+    transition: 0.2s ease;
+}
+
+.search-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 26px rgba(77, 124, 255, 0.4);
+}
+
+
+/* mobile */
+
+@media (max-width: 480px) {
+    .page {
+        margin: 60px auto;
+    }
+}
