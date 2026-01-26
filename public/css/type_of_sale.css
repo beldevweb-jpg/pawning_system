@@ -98,6 +98,7 @@ body {
   }
 }
 
+/* แจ้ง error */
 .alert-danger {
   background: #f8d7da;
   color: #721c24;

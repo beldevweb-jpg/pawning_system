@@ -51,13 +51,6 @@ class CommerceController extends Controller
         return view('commerce::commerce.create_type_of_sale');
     }
 
-    // ฟอร์มแสดงการจำนำ
-    public function create_pawning()
-    {
-        return view('commerce::commerce.create_pawning',);
-    }
-
-
     // เพิ่มประเภทการขาย
     public function store_create_type_of_sale(Request $request)
     {
@@ -72,42 +65,65 @@ class CommerceController extends Controller
         $sale->type_serve = $type_serve;
         $sale->save();
 
-        return redirect()->route('commerce.create_pawning')
+        return redirect()->route('commerce.create_pawning', ['id' => $sale->id])
             ->with('success', 'บันทึกรายการจำนำเรียบร้อย');
     }
 
-    // เพิ่มข้อมูลจำนำ
-    public function store_crate_pawming(Request $request)
+    // ฟอร์มแสดงการจำนำ
+    public function create_pawning($id)
     {
-        $request->validate([
+        $sale = Sale::where('id', $id)->first();
+        // dd($id);
+        return view('commerce::commerce.create_pawning', compact('id'));
+    }
 
-            'sale' => 'required',
-            'service' => 'required',
-            'phone' => 'nullable|string',
-            'tax_number' => 'nullable|string',
-            'brand' => 'required',
-            'model' => 'required',
-        ]);
+    public function store_create_pawning(Request $request)
+    {
+        // dd($request->all());
+        $request->validate(
+            [
+                'members' => 'required|string',
+                'phone' => 'required|string',
+                'tax_number' => 'nullable|string',
+                'type_serve' => 'required',
+                'type_category' => 'required',
+                'brand' => 'required',
+                'model' => 'required',
+                'price' => 'required|numeric',
+            ],
+            [
+                'members.required' => 'กรุณากรอกชื่อลูกค้า',
+                'phone.required' => 'กรุณากรอกเบอร์โทรศัพท์',
+                'type_serve.required' => 'กรุณาเลือกประเภทการให้บริการ',
+                'type_category.required' => 'กรุณาเลือกหมวดหมู่สินค้า',
+                'brand.required' => 'กรุณากรอกยี่ห้อสินค้า',
+                'model.required' => 'กรุณากรอกรุ่นสินค้า',
+                'price.required' => 'กรุณากรอกราคาสินค้า',
+                'price.numeric' => 'ราคาสินค้าต้องเป็นตัวเลขเท่านั้น',
+            ]
+        );
 
         DB::transaction(function () use ($request) {
-            $sale = new Sale();
-            $sale->members = $request->members;
-            $sale->phone = $request->phone;
-            $sale->tax_number = $request->tax_number;
-            $sale->type_serve = $request->type_serve;
-            $sale->type_category = $request->type_category;
-            $sale->brand = $request->brand;
-            $sale->model = $request->model;
-            $sale->serial_number = $request->serial_number;
-            $sale->description = $request->description;
-            $sale->price = $request->price;
-            $sale->others = $request->others;
-            $sale->save();
+            Sale::create([
+                'members' => $request->members,
+                'phone' => $request->phone,
+                'tax_number' => $request->tax_number,
+                'type_serve' => $request->type_serve,
+                'type_category' => $request->type_category,
+                'brand' => $request->brand,
+                'model' => $request->model,
+                'serial_number' => $request->serial_number,
+                'description' => $request->description,
+                'price' => $request->price,
+                'others' => $request->others,
+            ]);
         });
 
-        return redirect()->route('commerce.report_pawming')
+        return redirect()
+            ->route('commerce.report_pawming')
             ->with('success', 'บันทึกรายการจำนำเรียบร้อย');
     }
+
 
     public function report_pawning_confirm()
     {

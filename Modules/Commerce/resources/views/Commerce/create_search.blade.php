@@ -5,8 +5,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ค้นหาประวัติ</title>
-    <link rel="stylesheet" href="search.css">
-    <script src="script.js" defer></script>
+    <link rel="stylesheet" href="{{ asset('css/search.css') }}">
+    <script src="{{ asset('js/app.js') }}"></script>
 </head>
 
 <body>
@@ -26,12 +26,13 @@
 
                 <div class="field">
                     <label>หมายเลขเครื่อง (IMEI / Serial)</label>
-                    <input id="serial" type="number" placeholder="กรอกหมายเลขเครื่อง">
+                    <input id="serial" type="text" placeholder="กรอกหมายเลขเครื่อง"
+                        oninput="this.value=this.value.replace(/[^a-zA-Z0-9ก-๙\s]/g,'')">
                 </div>
 
                 <button type="submit" class="search-btn">
-    🔍 ค้นหาประวัติ
-  </button>
+                    🔍 ค้นหาประวัติ
+                </button>
             </form>
 
         </div>

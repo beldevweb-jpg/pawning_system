@@ -1,0 +1,16 @@
+.error-box {
+    border: 1px solid red;
+    background: #ffecec;
+    color: red;
+    padding: 8px 10px;
+    margin: 10px;
+    font-size: 14px;
+}
+
+.error-box ul {
+    margin: 5px 0 0 15px;
+    padding: 0;
+}
+.error-box ul li {
+    list-style-type: disc;
+}
