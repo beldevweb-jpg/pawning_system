@@ -1,0 +1,142 @@
+/* RESET */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Segoe UI", Tahoma, sans-serif;
+}
+
+
+/* PAGE */
+
+body {
+    background: #eaf8ff;
+}
+
+
+/* CONTAINER */
+
+.container {
+    padding: 30px;
+    min-height: 100vh;
+}
+
+
+/* CARD */
+
+.card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+
+/* HEADER */
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.page-header h2 {
+    font-size: 22px;
+    font-weight: 600;
+    color: #000;
+}
+
+
+/* SEARCH BOX */
+
+.search-box {
+    width: 180px;
+    padding: 6px 12px;
+    border-radius: 10px;
+    border: 2px solid #000;
+    outline: none;
+    font-size: 14px;
+}
+
+
+/* TABLE WRAPPER */
+
+.table-wrapper {
+    border: 2px solid #000;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+
+/* TABLE */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead {
+    background: #f5f5f5;
+}
+
+th,
+td {
+    padding: 10px;
+    font-size: 14px;
+    text-align: center;
+    border-bottom: 1px solid #000;
+    border-right: 1px solid #000;
+}
+
+th:last-child,
+td:last-child {
+    border-right: none;
+}
+
+
+/* ROW EFFECT */
+
+tbody tr:hover {
+    background: #eaf8ff;
+    cursor: pointer;
+}
+
+
+/* STATUS */
+
+.status {
+    font-weight: 600;
+}
+
+.status.active {
+    color: #1fa600;
+}
+
+.status.pending {
+    color: #ff9800;
+}
+
+.status.closed {
+    color: #d32f2f;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .search-box {
+        width: 100%;
+    }
+    th,
+    td {
+        font-size: 12px;
+        padding: 8px;
+    }
+}
