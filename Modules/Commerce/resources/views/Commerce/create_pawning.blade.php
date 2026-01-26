@@ -55,6 +55,7 @@
                 <label>เบอร์ติดต่อ</label>
                 <input>
             </div>
+                <h5>ประเภทสินค้า</h5>
         </div>
 
         <div class="card">
@@ -78,7 +79,7 @@
                 <label class="option"><input type="radio" name="brand" value="huawei"> Huawei</label>
                 <label class="option"><input type="radio" name="brand" value="realme"> realme</label>
                 <label class="option"><input type="radio" name="brand" value="vivo"> vivo</label>
-
+    
                 <div class="option-other">
                     <label class="option">
                         <input type="radio" id="brand-other" name="brand">
