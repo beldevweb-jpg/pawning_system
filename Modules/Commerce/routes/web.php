@@ -8,13 +8,13 @@ use Modules\Commerce\Http\Controllers\CommerceController;
 // });
 
 Route::group([], function () {
-    route::get('/create_type_of_sale', [CommerceController::class, 'create_type_of_sale'])->name('commerce.create_type_of_sale');
-    route::post('/store_create_type_of_sale', [CommerceController::class, 'store_create_type_of_sale'])->name('commerce.store_create_type_of_sale');
-    route::get('/create_pawning/{id}', [CommerceController::class, 'create_pawning'])->name('commerce.create_pawning');
-    route::post('/store_create_pawning', [CommerceController::class, 'store_create_pawning'])->name('commerce.store_create_pawning');
     route::get('/create_search', [CommerceController::class, 'create_search'])->name('commerce.create_search');
     route::post('/store_create_search', [CommerceController::class, 'store_create_search'])->name('commerce.store_create_search');
+    route::get('/create_type_of_sale', [CommerceController::class, 'create_type_of_sale'])->name('commerce.create_type_of_sale');
+    route::post('/store_create_type_of_sale', [CommerceController::class, 'store_create_type_of_sale'])->name('commerce.store_create_type_of_sale');
+    route::get('/create_pawning/{id}', [CommerceController::class, 'create_pawning'])->name('commerce. ');
+    Route::post('/commerce/pawning/{id}/update', [CommerceController::class, 'update_pawning'])
+        ->name('commerce.update_pawning');
     route::get('/customer', [CommerceController::class, 'customer'])->name('commerce.customer');
-    route::get('/report_pawning_confirm', [CommerceController::class, 'report_pawning_confirm'])->name('commerce.report_pawning_confirm');
     route::delete('/destroy/{id}', [CommerceController::class, 'destroy'])->name('commerce.destroy');
 });

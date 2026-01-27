@@ -18,23 +18,20 @@
         <button class="logout">ออกจากระบบ</button>
     </header>
 
-    @if (session()->has('success'))
-        <div class="alert alert-info" role="alert">
-            <strong>{{ session()->get('success') }}</strong>
-        </div>
-        @php session()->forget('success') @endphp
-    @endif
     @if ($errors->any())
-        <div class="alert alert-danger" role="alert">
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
+        <div class="error-box">
+            กรุณากรอกข้อมูลให้ครบ
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>- {{ $error }}</li>
+                @endforeach
+            </ul>
         </div>
     @endif
 
     <h1 class="title">ขาย</h1>
 
-    <form method="POST" action="{{ route('commerce.update_pawning', $id) }}">
+    <form method="POST" action="{{ route('commerce.store_create_pawning') }}">
         @csrf
 
         <div class="container">
@@ -141,8 +138,7 @@
                     ยกเลิก
                 </button>
 
-                <button type="submit" id="btn-submit">บันทึก</button>
-
+                <button type="submit">บันทึก</button>
             </div>
         </div>
     </form>

@@ -13,6 +13,7 @@ class Member extends Model
     /**
      * The attributes that are mass assignable.
      */
+    protected $table = 'members';
     protected $fillable = [];
 
     // protected static function newFactory(): MemberFactory
