@@ -45,19 +45,19 @@
                 <h2>ประเภท</h2>
 
                 <label class="option">
-                    <input type="radio" name="type_serve" value="pawn"
+                    <input type="radio" name="selltype" value="pawn"
                         {{ old('type_serve') == 'pawn' ? 'checked' : '' }} required> วาง
                 </label>
                 <label class="option">
-                    <input type="radio" name="type_serve" value="extend"
+                    <input type="radio" name="selltype" value="extend"
                         {{ old('type_serve') == 'extend' ? 'checked' : '' }}> ต่อ
                 </label>
                 <label class="option">
-                    <input type="radio" name="type_serve" value="redeem"
+                    <input type="radio" name="selltype" value="redeem"
                         {{ old('type_serve') == 'redeem' ? 'checked' : '' }}> ไถ่
                 </label>
                 <label class="option">
-                    <input type="radio" name="type_serve" value="other" id="typesell-other-input"
+                    <input type="radio" name="selltype" value="other" id="pawn-other"
                         {{ old('type_serve') == 'other' ? 'checked' : '' }}> อื่นๆ
                 </label>
 
@@ -102,11 +102,11 @@
                         {{ old('type_category') == 'tablet' ? 'checked' : '' }}> Tablet
                 </label>
                 <label class="option">
-                    <input type="radio" name="type_category" value="other" id="type-other-input"
+                    <input type="radio" name="type_category" value="other" id="type-other"
                         {{ old('type_category') == 'other' ? 'checked' : '' }}> อื่นๆ
                 </label>
 
-                <input class="input" name="other" id="type-category-input" placeholder="กรอกประเภทสินค้า"
+                <input class="input" name="other" id="type-other-input" placeholder="กรอกประเภทสินค้า"
                     value="{{ old('description') }}" {{ old('type_category') == 'other' ? '' : 'disabled' }}>
             </div>
 
