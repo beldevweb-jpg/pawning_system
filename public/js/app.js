@@ -35,8 +35,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // === toggle ช่องอื่นๆ ===
-  toggleOther("selltype", "pawn-other", "typesell-other-input");
-  toggleOther("product_type", "type-other", "type-other-input");
+  toggleOther("subcategories", "pawn-other", "typesell-other-input");
+  toggleOther("type_category", "type-other", "type-other-input");
   toggleOther("brand", "brand-other", "brand-other-input");
 
   /* =====================

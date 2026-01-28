@@ -2,12 +2,13 @@
 
 namespace Modules\Commerce\Http\Controllers;
 
-use DB;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Modules\Commerce\Models\Sale;
 use Modules\Members\Models\Member;
+use Illuminate\Support\Str;
 
 class CommerceController extends Controller
 {
@@ -18,17 +19,6 @@ class CommerceController extends Controller
     {
         return view('commerce::commerce.create_search');
     }
-
-    public function create_member()
-    {
-        return view('commerce::commerce.create_member');
-    }
-
-    public function store_create_member(Request $request)
-    {
-        // Logic to store member information
-    }
-
     // ค่้นหาประวัติการขาย/ลูกค้า
     public function store_create_search(Request $request)
     {
@@ -54,7 +44,7 @@ class CommerceController extends Controller
 
             if (!$member) {
                 return redirect()
-                    ->route('commerce.create_type_of_sale')
+                    ->route('commerce.create_member')
                     ->withErrors(['error', 'ไม่พบประวัติลูกค้า']);
             }
 
@@ -62,98 +52,121 @@ class CommerceController extends Controller
         }
     }
 
-    // แสดงหน้าลูกค้า
-    public function customer()
+    public function create_member()
     {
-        return view('commerce::commerce.customer');
+        return view('commerce::commerce.create_member');
     }
 
-    // ฟอร์มแสดงประเป็นการขาย
-    public function create_type_of_sale()
+    public function store_create_member(Request $request)
     {
-        return view('commerce::commerce.create_type_of_sale');
+        $request->validate([
+            'fullname' => 'required|string',
+            'phone' => 'required|numeric',
+            'tax_number' => 'nullable|numeric|unique:members,tax_number',
+            'idcard_image' => 'nullable|image|max:2048',
+        ]);
+
+        $member = DB::transaction(function () use ($request) {
+
+            $member = new Member();
+            $member->fullname = $request->fullname;
+            $member->phone = $request->phone;
+            $member->tax_number = $request->tax_number;
+
+            if ($request->hasFile('idcard_image')) {
+                $member->idcard_image = $request->file('idcard_image')
+                    ->store('idcards', 'public');
+            }
+
+            $member->save();
+
+            return $member;
+        });
+        return redirect()
+            ->route('commerce.create_type_of_sale', [
+                'member_id' => $member->id
+            ]);;
     }
 
-    // ประเภทการขาย
+
+
+    public function create_type_of_sale(Request $request)
+    {
+        $member = Member::findOrFail($request->member_id);
+
+        return view('commerce::commerce.create_type_of_sale', compact('member'));
+    }
+
+
     public function store_create_type_of_sale(Request $request)
     {
         $request->validate([
             'type' => 'required|in:pawn,counter,service',
+            'member_id' => 'required|exists:members,id',
         ]);
 
-        if ($request->filled('sale_id')) {
-            $sale = Sale::findOrFail($request->sale_id);
-        } else {
-            $sale = new Sale();
-        }
-
-        $sale->type_serve = $request->type;
-
-        if ($request->filled('member_id')) {
-            $sale->member_id = $request->member_id;
-        }
-
-        $sale->save();
+        $sale = Sale::create([
+            'subcategories' => $request->type,
+            'member_id' => $request->member_id,
+        ]);
 
         return redirect()
-            ->route('commerce.create_pawning', ['id' => $sale->id])
-            ->with('success', 'เลือกประเภทรายการเรียบร้อย');
+            ->route('commerce.create_pawning', [
+                'sale_id' => $sale->id
+            ]);
     }
+
+
+
 
     // ฟอร์มแสดงการจำนำ
-    public function create_pawning($id)
+    public function create_pawning(Request $request)
     {
-        $sale = Sale::where('id', $id)->first();
-        return view('commerce::commerce.create_pawning', compact('id'));
-    }
+        $sale = Sale::with('member')->findOrFail($request->sale_id);
 
-    public function store_pawning(Request $request, $id)
-    {
-        $request->validate(
+        return view(
+            'commerce::commerce.create_pawning',
             [
-                'fullname' => 'required|string',
-                'phone' => 'required|numeric',
-                'tax_number' => 'nullable|numeric',
-                'type_serve' => 'required',
-                'type_category' => 'required',
-                'brand' => 'required|string',
-                'model' => 'required|string',
-                'price' => 'required|numeric',
-                'serial_number' => 'nullable|string',
-                'description' => 'nullable|string',
-            ],
-            [
-                'fullname.required' => 'กรุณากรอกชื่อลูกค้า',
-                'phone.required' => 'กรุณากรอกเบอร์โทรศัพท์',
-                'phone.numeric' => 'เบอร์โทรศัพท์ต้องเป็นตัวเลข',
-                'type_serve.required' => 'กรุณาเลือกประเภทการให้บริการ',
-                'type_category.required' => 'กรุณาเลือกหมวดหมู่สินค้า',
-                'brand.required' => 'กรุณาเลือกยี่ห้อสินค้า',
-                'model.required' => 'กรุณากรอกรุ่นสินค้า',
-                'price.required' => 'กรุณากรอกราคาสินค้า',
-                'price.numeric' => 'ราคาสินค้าต้องเป็นตัวเลข',
+                'sale' => $sale,
+                'member' => $sale->member
             ]
         );
+    }
 
-        DB::transaction(function () use ($request, $id) {
-            $sale = Sale::findOrFail($id); // ❗ ถ้าไม่เจอ id จะ error ทันที
-            $sale->fullname = $request->fullname;
-            $sale->phone = $request->phone;
-            $sale->tax_number = $request->tax_number;
-            $sale->type_serve = $request->type_serve;
-            $sale->type_category = $request->type_category;
-            $sale->brand = $request->brand;
-            $sale->model = $request->model;
-            $sale->price = $request->price;
-            $sale->serial_number = $request->serial_number;
-            $sale->description = $request->description;
-            $sale->save();
+
+    public function store_pawning(Request $request)
+    {
+        $request->validate([
+            'sale_id' => 'required|exists:sales,id',
+            'subcategories' => 'required',
+            'type_category' => 'required',
+            'brand' => 'required|string',
+            'model' => 'required|string',
+            'price' => 'required|numeric',
+            'serial_number' => 'required|string',
+            'note' => 'nullable|string',
+        ]);
+
+        DB::transaction(function () use ($request) {
+            $sale = Sale::findOrFail($request->sale_id);
+
+            $sale->update([
+                'brand' => $request->brand,
+                'model' => $request->model,
+                'serial_number' => $request->serial_number,
+                'note' => $request->note,
+                'price' => $request->price,
+                'type_category' => $request->type_category,
+                'subcategories' => $request->subcategories,
+            ]);
         });
 
         return redirect()
-            ->route('commerce.crate_search')
-            ->with('success', 'แก้ไขรายการจำนำเรียบร้อยแล้ว', $id);
+            ->route('commerce.create_search')
+            ->with('success', 'รายการขายเรียบร้อยแล้ว');
     }
+
+
 
     public function index()
     {
