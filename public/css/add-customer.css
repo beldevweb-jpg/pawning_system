@@ -1,0 +1,118 @@
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap');
+
+* {
+  box-sizing: border-box;
+  font-family: "Kanit", sans-serif;
+}
+
+body {
+  margin: 0;
+  background: linear-gradient(180deg, #eef4ff, #e6efff);
+  min-height: 100vh;
+  color: #2c3e50;
+}
+
+/* HEADER */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+}
+
+.avatar {
+  background: #e3ecff;
+  border-radius: 50%;
+  padding: 6px 8px;
+}
+
+.logout {
+  background: #ffffff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  color: #2b6cff;
+  font-weight: 500;
+}
+
+/* TITLE */
+.title {
+  text-align: center;
+  margin: 20px 0;
+  font-size: 30px;
+  font-weight: 600;
+  color: #2d4f9c;
+}
+
+/* CARD */
+.card {
+  background: #eaf3ff;
+  border-radius: 36px;
+  padding: 36px;
+  width: 90%;
+  max-width: 500px;
+  margin: auto;
+}
+
+/* FORM */
+.form-row {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px;
+}
+
+.form-row label {
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #4a5f8c;
+}
+
+.form-row input {
+  height: 48px;
+  padding: 0 18px;
+  border-radius: 24px;
+  border: none;
+  font-size: 15px;
+  outline: none;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px #dde6ff;
+}
+
+.form-row input[type="file"] {
+  padding: 10px;
+}
+
+/* BUTTONS */
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 30px;
+}
+
+.btn {
+  width: 45%;
+  height: 48px;
+  border-radius: 30px;
+  border: none;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn.cancel {
+  background:#4a5f8c;;
+  color: #ffffff;
+}
+
+.btn.confirm {
+  background: #4a5f8c;;
+  color: #ffffff;
+}
