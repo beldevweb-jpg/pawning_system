@@ -123,8 +123,8 @@ body {
 }
 
 .submit button[name="cancel"] {
-  background: #eef3ff;
-  color: #4a6edc;
+  background: #4a5f8c;;
+  color: #ffffff;
 }
 
 .submit button[name="cancel"]:hover {
@@ -132,7 +132,7 @@ body {
 }
 
 .submit button[name="next"] {
-  background: linear-gradient(180deg, #4d7cff, #3b66e6);
+   background: #4a5f8c;;
   color: #ffffff;
 }
 
