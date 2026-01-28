@@ -83,18 +83,12 @@ class CommerceController extends Controller
             return $member;
         });
         return redirect()
-            ->route('commerce.create_type_of_sale', [
-                'member_id' => $member->id
-            ]);;
+            ->route('commerce.create_type_of_sale');
     }
 
-
-
-    public function create_type_of_sale(Request $request)
+    public function create_type_of_sale()
     {
-        $member = Member::findOrFail($request->member_id);
-
-        return view('commerce::commerce.create_type_of_sale', compact('member'));
+        return view('commerce::commerce.create_type_of_sale');
     }
 
 
@@ -115,9 +109,6 @@ class CommerceController extends Controller
                 'sale_id' => $sale->id
             ]);
     }
-
-
-
 
     // ฟอร์มแสดงการจำนำ
     public function create_pawning(Request $request)
