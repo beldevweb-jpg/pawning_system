@@ -35,6 +35,7 @@
                 @endforeach
             </div>
         @endif
+        
         <h1 class="title">โอ๋ โมบาย</h1>
         <form method="POST" action="{{ route('commerce.store_create_type_of_sale') }}">
             @csrf

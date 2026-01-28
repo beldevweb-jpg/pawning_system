@@ -19,6 +19,16 @@ class CommerceController extends Controller
         return view('commerce::commerce.create_search');
     }
 
+    public function create_member()
+    {
+        return view('commerce::commerce.create_member');
+    }
+
+    public function store_create_member(Request $request)
+    {
+        // Logic to store member information
+    }
+
     // ค่้นหาประวัติการขาย/ลูกค้า
     public function store_create_search(Request $request)
     {
@@ -32,7 +42,7 @@ class CommerceController extends Controller
             if (!$sale) {
                 return redirect()
                     ->route('commerce.create_type_of_sale')
-                    ->withErrors('error', 'ไม่พบประวัติเครื่อง');
+                    ->withErrors(['error', 'ไม่พบประวัติเครื่อง']);
             }
 
             return view('commerce::commerce.create_type_of_sale', compact('sale'));
@@ -45,15 +55,12 @@ class CommerceController extends Controller
             if (!$member) {
                 return redirect()
                     ->route('commerce.create_type_of_sale')
-                    ->withErrors(['ไม่พบประวัติลูกค้า']);
+                    ->withErrors(['error', 'ไม่พบประวัติลูกค้า']);
             }
 
             return view('commerce::commerce.create_type_of_sale', compact('member'));
         }
     }
-
-
-
 
     // แสดงหน้าลูกค้า
     public function customer()
@@ -74,15 +81,23 @@ class CommerceController extends Controller
             'type' => 'required|in:pawn,counter,service',
         ]);
 
-        $type_serve = $request->type;
+        if ($request->filled('sale_id')) {
+            $sale = Sale::findOrFail($request->sale_id);
+        } else {
+            $sale = new Sale();
+        }
 
-        $sale = new Sale();
-        // dd($type_serve);
-        $sale->type_serve = $type_serve;
+        $sale->type_serve = $request->type;
+
+        if ($request->filled('member_id')) {
+            $sale->member_id = $request->member_id;
+        }
+
         $sale->save();
 
-        return redirect()->route('commerce.create_pawning', ['id' => $sale->id])
-            ->with('success', 'บันทึกรายการจำนำเรียบร้อย');
+        return redirect()
+            ->route('commerce.create_pawning', ['id' => $sale->id])
+            ->with('success', 'เลือกประเภทรายการเรียบร้อย');
     }
 
     // ฟอร์มแสดงการจำนำ
@@ -92,7 +107,7 @@ class CommerceController extends Controller
         return view('commerce::commerce.create_pawning', compact('id'));
     }
 
-    public function update_pawning(Request $request, $id)
+    public function store_pawning(Request $request, $id)
     {
         $request->validate(
             [
@@ -122,22 +137,22 @@ class CommerceController extends Controller
 
         DB::transaction(function () use ($request, $id) {
             $sale = Sale::findOrFail($id); // ❗ ถ้าไม่เจอ id จะ error ทันที
-
-            $sale->update([
-                'type_serve' => $request->type_serve,
-                'type_category' => $request->type_category,
-                'brand' => $request->brand,
-                'model' => $request->model,
-                'serial_number' => $request->serial_number,
-                'description' => $request->description,
-                'price' => $request->price,
-                'others' => $request->others,
-            ]);
+            $sale->fullname = $request->fullname;
+            $sale->phone = $request->phone;
+            $sale->tax_number = $request->tax_number;
+            $sale->type_serve = $request->type_serve;
+            $sale->type_category = $request->type_category;
+            $sale->brand = $request->brand;
+            $sale->model = $request->model;
+            $sale->price = $request->price;
+            $sale->serial_number = $request->serial_number;
+            $sale->description = $request->description;
+            $sale->save();
         });
 
         return redirect()
             ->route('commerce.crate_search')
-            ->with('success', 'แก้ไขรายการจำนำเรียบร้อยแล้ว');
+            ->with('success', 'แก้ไขรายการจำนำเรียบร้อยแล้ว', $id);
     }
 
     public function index()
@@ -146,10 +161,13 @@ class CommerceController extends Controller
         return view('commerce::index');
     }
 
-    // public function report_pawning_confirm()
-    // {
-    //     return view('commerce::commerce.report_pawning_confirm');
-    // }
+    public function report_pawning($id)
+    {
+        $sale = Sale::where('id', $id)->first();
+        $member_id = $sale->member_id;
+        $member = Member::where('id', $member_id)->first();
+        return view('commerce::commerce.report_pawning', compact('sale', 'member'));
+    }
 
     /**
      * Store a newly created resource in storage.

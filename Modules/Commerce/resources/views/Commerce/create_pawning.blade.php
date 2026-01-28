@@ -24,6 +24,7 @@
         </div>
         @php session()->forget('success') @endphp
     @endif
+
     @if ($errors->any())
         <div class="alert alert-danger" role="alert">
             @foreach ($errors->all() as $error)
@@ -34,7 +35,7 @@
 
     <h1 class="title">ขาย</h1>
 
-    <form method="POST" action="{{ route('commerce.update_pawning', $id) }}">
+    <form method="POST" action="{{ route('commerce.store_pawning', $id) }}">
         @csrf
 
         <div class="container">
