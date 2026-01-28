@@ -57,7 +57,7 @@
                         {{ old('type_serve') == 'redeem' ? 'checked' : '' }}> ไถ่
                 </label>
                 <label class="option">
-                    <input type="radio" name="type_serve" value="other" id="type-serve-other"
+                    <input type="radio" name="type_serve" value="other" id="typesell-other-input"
                         {{ old('type_serve') == 'other' ? 'checked' : '' }}> อื่นๆ
                 </label>
 
@@ -102,7 +102,7 @@
                         {{ old('type_category') == 'tablet' ? 'checked' : '' }}> Tablet
                 </label>
                 <label class="option">
-                    <input type="radio" name="type_category" value="other" id="type-category-other"
+                    <input type="radio" name="type_category" value="other" id="type-other-input"
                         {{ old('type_category') == 'other' ? 'checked' : '' }}> อื่นๆ
                 </label>
 
