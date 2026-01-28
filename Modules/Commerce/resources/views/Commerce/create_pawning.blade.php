@@ -121,6 +121,10 @@
                         {{ ucfirst($brand) }}
                     </label>
                 @endforeach
+                <label class="option">
+                    <input type="radio" name="brand" value="other" id="brand-other"
+                        {{ old('type_category') == 'other' ? 'checked' : '' }}> อื่นๆ
+                </label>
                 <input class="input" name="other" id="brand-other-input" placeholder="กรอกยี่ห้อ"
                     value="{{ old('description') }}" {{ old('type_category') == 'other' ? '' : 'disabled' }}>
             </div>
