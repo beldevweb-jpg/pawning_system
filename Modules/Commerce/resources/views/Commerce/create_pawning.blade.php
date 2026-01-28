@@ -106,7 +106,7 @@
                         {{ old('type_category') == 'other' ? 'checked' : '' }}> อื่นๆ
                 </label>
 
-                <input class="input" name="description" id="type-category-input" placeholder="กรอกประเภทสินค้า"
+                <input class="input" name="other" id="type-category-input" placeholder="กรอกประเภทสินค้า"
                     value="{{ old('description') }}" {{ old('type_category') == 'other' ? '' : 'disabled' }}>
             </div>
 
@@ -114,13 +114,15 @@
             <div class="card">
                 <h2>ยี่ห้อ</h2>
 
-                @foreach (['iphone', 'samsung', 'oppo', 'vivo'] as $brand)
+                @foreach (['iphone', 'samsung', 'oppo', 'vivo', 'huawei', 'realme',] as $brand)
                     <label class="option">
                         <input type="radio" name="brand" value="{{ $brand }}"
                             {{ old('brand') == $brand ? 'checked' : '' }} required>
                         {{ ucfirst($brand) }}
                     </label>
                 @endforeach
+                <input class="input" name="other" id="brand-other-input" placeholder="กรอกยี่ห้อ"
+                    value="{{ old('description') }}" {{ old('type_category') == 'other' ? '' : 'disabled' }}>
             </div>
 
             <!-- รุ่น -->
