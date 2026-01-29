@@ -19,37 +19,45 @@ class CommerceController extends Controller
     {
         return view('commerce::commerce.create_search');
     }
+
     // ค่้นหาประวัติการขาย/ลูกค้า
     public function store_create_search(Request $request)
     {
-        $tax_number = $request->tax_number;
+        $tax_number    = $request->tax_number;
         $serial_number = $request->serial_number;
 
-        // ค้นหาด้วย serial_number
-        if ($serial_number) {
-            $sale = Sale::where('serial_number', $serial_number)->first();
+        if (!empty($serial_number)) {
+            $sale = Sale::where('serial_number', 'LIKE', "%{$serial_number}%")->first();
 
             if (!$sale) {
-                return redirect()
-                    ->route('commerce.create_type_of_sale')
-                    ->withErrors(['error', 'ไม่พบประวัติเครื่อง']);
+                return back()->withErrors(['error' => 'ไม่พบประวัติเครื่อง']);
             }
 
-            return view('commerce::commerce.create_type_of_sale', compact('sale'));
+            return redirect()->route('commerce.customer', $sale->id);
         }
 
-        // ค้นหาด้วย tax_number
-        if ($tax_number) {
-            $member = Member::where('tax_number', $tax_number)->first();
+        if (!empty($tax_number)) {
+            $member = Member::where('tax_number', 'LIKE', "%{$tax_number}%")->first();
 
             if (!$member) {
                 return redirect()
                     ->route('commerce.create_member')
-                    ->withErrors(['error', 'ไม่พบประวัติลูกค้า']);
+                    ->withErrors(['error' => 'ไม่พบประวัติลูกค้า']);
             }
 
-            return view('commerce::commerce.create_type_of_sale', compact('member'));
+            return redirect()->route('commerce.customer', $member->member_id);
         }
+
+        return back()->withErrors(['error' => 'กรุณากรอกข้อมูลเพื่อค้นหา']);
+    }
+
+
+
+    public function create_type_of_sale($id)
+    {
+        $member = Member::findOrFail($id);
+
+        return view('commerce::commerce.create_type_of_sale', compact('member'));
     }
 
     public function create_member()
@@ -79,51 +87,45 @@ class CommerceController extends Controller
             }
 
             $member->save();
-
             return $member;
         });
+
         return redirect()
-            ->route('commerce.create_type_of_sale');
+            ->route('commerce.create_type_of_sale', ['id' => $member->member_id]);
     }
 
-    public function create_type_of_sale()
+    public function store_create_type_of_sale(Request $request, $id)
     {
-        return view('commerce::commerce.create_type_of_sale');
-    }
-
-
-    public function store_create_type_of_sale(Request $request)
-    {
+        // validate
         $request->validate([
-            'type' => 'required|in:pawn,counter,service',
-            'member_id' => 'required|exists:members,id',
+            'type' => 'required|string'
         ]);
 
-        $sale = Sale::create([
-            'subcategories' => $request->type,
-            'member_id' => $request->member_id,
-        ]);
+        // หา member จาก id ที่มาจาก route
+        $member = Member::findOrFail($id);
 
-        return redirect()
-            ->route('commerce.create_pawning', [
-                'sale_id' => $sale->id
-            ]);
+        $sale = new Sale();
+        $sale->type_serve = $request->type;
+        $sale->member_id = $member->member_id;
+        $sale->save();
+
+        $member->sale_id = $sale->id;
+        $member->save();
+
+        return redirect()->route('commerce.create_pawning', [
+            'id' => $sale->id
+        ]);
     }
+
 
     // ฟอร์มแสดงการจำนำ
-    public function create_pawning(Request $request)
+    public function create_pawning($id)
     {
-        $sale = Sale::with('member')->findOrFail($request->sale_id);
+        $sale = Sale::findOrFail($id);
+        $member = Member::findOrFail($sale->member_id);
 
-        return view(
-            'commerce::commerce.create_pawning',
-            [
-                'sale' => $sale,
-                'member' => $sale->member
-            ]
-        );
+        return view('commerce::commerce.create_pawning', compact('sale', 'member'));
     }
-
 
     public function store_pawning(Request $request)
     {
@@ -138,10 +140,14 @@ class CommerceController extends Controller
             'note' => 'nullable|string',
         ]);
 
-        DB::transaction(function () use ($request) {
-            $sale = Sale::findOrFail($request->sale_id);
+        $member_id = null;
 
-            $sale->update([
+        DB::transaction(function () use ($request, &$member_id) {
+
+            $sale = Sale::findOrFail($request->sale_id);
+            $member_id = $sale->member_id;
+
+            $updateData = [
                 'brand' => $request->brand,
                 'model' => $request->model,
                 'serial_number' => $request->serial_number,
@@ -149,15 +155,28 @@ class CommerceController extends Controller
                 'price' => $request->price,
                 'type_category' => $request->type_category,
                 'subcategories' => $request->subcategories,
-            ]);
+            ];
+
+            if ($request->filled('type_serve')) {
+                $updateData['type_serve'] = $request->type_serve;
+            }
+
+            $sale->update($updateData);
         });
 
-        return redirect()
-            ->route('commerce.create_search')
-            ->with('success', 'รายการขายเรียบร้อยแล้ว');
+        return redirect()->route('commerce.create_search', [
+            'member_id' => $member_id
+        ]);
     }
 
 
+    public function customer($id)
+    {
+        // dd($id);
+        $member = Member::where('member_id', $id)->get();
+        dd($member->sales_r);
+        return view('commerce::commerce.customer', compact('member'));
+    }
 
     public function index()
     {

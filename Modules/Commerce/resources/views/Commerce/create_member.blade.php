@@ -21,26 +21,27 @@
 
     <!-- TITLE -->
     <h1 class="title">เพิ่มข้อมูลลูกค้า</h1>
-    @if (session()->has('success'))
-        <div class="alert alert-info" role="alert">
-            <strong>{{ session()->get('success') }}</strong>
-        </div>
-        @php session()->forget('success') @endphp
-    @endif
+    {{-- success --}}
 
-    @if ($errors->any())
-        <div class="alert alert-danger" role="alert">
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </div>
-    @endif
+
+
     <!-- FORM CARD -->
     <form action="{{ route('commerce.store_create_member') }}" method="POST" enctype="multipart/form-data">
         @csrf
-
         <div class="card">
+            @if (session('success'))
+                <div class="msg ok">
+                    {{ session('success') }}
+                </div>
+            @endif
 
+            @if ($errors->any())
+                <div class="msg err">
+                    @foreach ($errors->all() as $error)
+                        <div>- {{ $error }}</div>
+                    @endforeach
+                </div>
+            @endif
             <div class="form-row">
                 <label>เลขบัตรประชาชน</label>
                 <input type="text" name="tax_number" id="idcard" placeholder="กรอกเลขบัตรประชาชน">

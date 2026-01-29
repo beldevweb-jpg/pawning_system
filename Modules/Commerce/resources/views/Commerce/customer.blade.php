@@ -11,15 +11,25 @@
 <body>
     <div class="container">
         <div class="card">
+            @if (session('success'))
+                <div class="msg ok">
+                    {{ session('success') }}
+                </div>
+            @endif
 
-            <!-- HEADER -->
+            @if ($errors->any())
+                <div class="msg err">
+                    @foreach ($errors->all() as $error)
+                        <div>- {{ $error }}</div>
+                    @endforeach
+                </div>
+            @endif
             <div class="page-header">
                 <h2>ข้อมูลลูกค้า / ข้อมูลโทรศัพท์</h2>
 
                 <input type="text" class="search-box" placeholder="ค้นหา..." />
             </div>
 
-            <!-- TABLE -->
             <div class="table-wrapper">
                 <table>
                     <thead>
@@ -33,15 +43,18 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- ตัวอย่างข้อมูล -->
-                        <tr>
-                            <td>1</td>
-                            <td>iPhone</td>
-                            <td>13 Pro</td>
-                            <td>ABC123456</td>
-                            <td>สมชาย</td>
-                            <td class="status active">ปกติ</td>
-                        </tr>
+                        @foreach ($member as $index => $item)
+                            @foreach ($item->sales_r as $sale)
+                                <tr>
+                                    <td>{{ $index + 1 }}</td>
+                                    <td>{{ $sale->brand ?? '' }}</td>
+                                    <td>{{ $sale->model ?? '' }}</td>
+                                    <td>{{ $sale->serial_number ?? '' }}</td>
+                                    <td>{{ $item->fullname ?? '' }}</td>
+                                    <td>{{ $item->status ?? '' }}</td>
+                                </tr>
+                            @endforeach
+                        @endforeach
                     </tbody>
                 </table>
             </div>

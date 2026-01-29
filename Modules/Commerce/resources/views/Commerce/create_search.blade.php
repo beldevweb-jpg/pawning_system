@@ -10,27 +10,26 @@
 </head>
 
 <body>
-    @if (session()->has('success'))
-        <div class="alert alert-info" role="alert">
-            <strong>{{ session()->get('success') }}</strong>
-        </div>
-        @php session()->forget('success') @endphp
-    @endif
-    @if ($errors->any())
-        <div class="alert alert-danger" role="alert">
-            @foreach ($errors->all() as $error)
-                {{ $error }}
-            @endforeach
-        </div>
-    @endif
-
     <main class="page">
         <h1 class="page-title">ค้นหาประวัติ</h1>
         <p class="page-subtitle">ค้นหาข้อมูลจากเบอร์โทรหรือหมายเลขเครื่อง</p>
 
-        <div class="search-card">
-            <form id="searchForm" method="POST" action="{{ route('commerce.store_create_search') }}">
-                @csrf
+        <form id="searchForm" method="POST" action="{{ route('commerce.store_create_search') }}">
+            @csrf
+            <div class="search-card">
+                @if (session('success'))
+                    <div class="msg ok">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if ($errors->any())
+                    <div class="msg err">
+                        @foreach ($errors->all() as $error)
+                            <div>- {{ $error }}</div>
+                        @endforeach
+                    </div>
+                @endif
                 <div class="field">
                     <label>บัตรประชาชน</label>
                     <input id="tax_number" name="tax_number" type="number" placeholder="บัตรประชาชน">
@@ -47,7 +46,7 @@
                 <button type="submit" class="search-btn">
                     🔍 ค้นหาประวัติ
                 </button>
-            </form>
+        </form>
 
 
         </div>

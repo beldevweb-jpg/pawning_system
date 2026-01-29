@@ -8,7 +8,6 @@
 </head>
 
 <body>
-
     <form method="POST" action="{{ route('commerce.store_pawning') }}">
         @csrf
 
@@ -23,7 +22,19 @@
         <h1 class="title">ขาย</h1>
 
         <div class="container">
+            @if (session('success'))
+                <div class="msg ok">
+                    {{ session('success') }}
+                </div>
+            @endif
 
+            @if ($errors->any())
+                <div class="msg err">
+                    @foreach ($errors->all() as $error)
+                        <div>- {{ $error }}</div>
+                    @endforeach
+                </div>
+            @endif
             <div class="card">
                 <h2>ประเภท</h2>
                 <input type="hidden" name="sale_id" value="{{ $sale->id }}">
@@ -127,10 +138,14 @@
             </div>
 
             <div class="submit">
-                <button type="button" name="cancel" onclick="goPage('index.html')">ยกเลิก</button>
-                <button type="submit">ดำเนินการต่อ</button>
-            </div>
+                <button type="reset" class="btn-cancel" onclick="history.back()">
+                    ยกเลิก
+                </button>
 
+                <button type="submit" class="btn-submit">
+                    ดำเนินการต่อ
+                </button>
+            </div>
         </div>
     </form>
 
