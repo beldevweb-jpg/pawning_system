@@ -12,14 +12,8 @@ use Modules\Members\Models\Member;
 
 class Sale extends Model
 {
-    use HasFactory;
-
-    /**
-     * The attributes that are mass assignable.
-     */
     protected $table = 'sales';
     protected $primaryKey = 'id';
-    public $incrementing = true;
 
     protected $fillable = [
         'member_id',
@@ -28,6 +22,8 @@ class Sale extends Model
         'serial_number',
         'note',
         'price',
+        'type_price',
+        'lock_pass',
         'others',
         'type_category',
         'subcategories',
@@ -35,14 +31,8 @@ class Sale extends Model
         'status',
     ];
 
-    public function member_r(): HasOne
+    public function member_r(): BelongsTo
     {
-        return $this->HasOne(Member::class, 'member_id', 'member_id');
+        return $this->belongsTo(Member::class, 'member_id', 'member_id');
     }
-
-
-    // protected static function newFactory(): SaleFactory
-    // {
-    //     // return SaleFactory::new();
-    // }
 }

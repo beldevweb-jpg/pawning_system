@@ -31,7 +31,7 @@ class Member extends Model
         'date_of_birth',
     ];
 
-    public function sale_r(): HasMany
+    public function sales_r(): HasMany
     {
         return $this->hasMany(Sale::class, 'member_id', 'member_id');
     }

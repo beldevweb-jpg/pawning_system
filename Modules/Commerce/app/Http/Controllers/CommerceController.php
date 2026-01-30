@@ -136,6 +136,8 @@ class CommerceController extends Controller
             'brand' => 'required|string',
             'model' => 'required|string',
             'price' => 'required|numeric',
+            'type_price' => 'required|string',
+            'lock_pass' => 'required|string',
             'serial_number' => 'required|string',
             'note' => 'nullable|string',
         ]);
@@ -152,6 +154,8 @@ class CommerceController extends Controller
                 'model' => $request->model,
                 'serial_number' => $request->serial_number,
                 'note' => $request->note,
+                'type_price' => $request->type_price,
+                'lock_pass' => $request->lock_pass,
                 'price' => $request->price,
                 'type_category' => $request->type_category,
                 'subcategories' => $request->subcategories,
@@ -169,14 +173,32 @@ class CommerceController extends Controller
         ]);
     }
 
-
     public function customer($id)
     {
-        // dd($id);
-        $member = Member::where('member_id', $id)->get();
-        dd($member->sales_r);
+        $member = Member::with('sales_r')
+            ->where('member_id', $id)
+            ->get();
+
         return view('commerce::commerce.customer', compact('member'));
     }
+
+    // public function customer(Request $request)
+    // {
+    //     $keyword = $request->keyword;
+
+    //     $sales = Sale::with('member_r')
+    //         ->where(function ($q) use ($keyword) {
+
+    //             $q->where('serial_number', 'like', "%{$keyword}%")
+
+    //                 ->orWhereHas('member_r', function ($q2) use ($keyword) {
+    //                     $q2->where('tax_number', 'like', "%{$keyword}%");
+    //                 });
+    //         })
+    //         ->get();
+
+    //     return view('commerce::commerce.customer', compact('sales'));
+    // }
 
     public function index()
     {

@@ -43,18 +43,23 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($member as $index => $item)
-                            @foreach ($item->sales_r as $sale)
+                        @foreach ($member as $item)
+                            @forelse ($item->sales_r as $sale)
                                 <tr>
-                                    <td>{{ $index + 1 }}</td>
-                                    <td>{{ $sale->brand ?? '' }}</td>
-                                    <td>{{ $sale->model ?? '' }}</td>
-                                    <td>{{ $sale->serial_number ?? '' }}</td>
-                                    <td>{{ $item->fullname ?? '' }}</td>
-                                    <td>{{ $item->status ?? '' }}</td>
+                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $sale->brand }}</td>
+                                    <td>{{ $sale->model }}</td>
+                                    <td>{{ $sale->serial_number }}</td>
+                                    <td>{{ $item->fullname }}</td>
+                                    <td>{{ $sale->status }}</td>
                                 </tr>
-                            @endforeach
+                            @empty
+                                <tr>
+                                    <td colspan="6">ไม่พบข้อมูล</td>
+                                </tr>
+                            @endforelse
                         @endforeach
+
                     </tbody>
                 </table>
             </div>
