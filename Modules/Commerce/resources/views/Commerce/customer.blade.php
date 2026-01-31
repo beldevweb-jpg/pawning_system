@@ -45,13 +45,16 @@
                     <tbody>
                         @foreach ($member as $item)
                             @forelse ($item->sales_r as $sale)
-                                <tr>
+                                <tr class="clickable-row"
+                                    onclick="window.location='{{ route('commerce.create_pawning', $item->sale_id) }}'">
+
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $sale->brand }}</td>
                                     <td>{{ $sale->model }}</td>
                                     <td>{{ $sale->serial_number }}</td>
                                     <td>{{ $item->fullname }}</td>
                                     <td>{{ $sale->status }}</td>
+
                                 </tr>
                             @empty
                                 <tr>

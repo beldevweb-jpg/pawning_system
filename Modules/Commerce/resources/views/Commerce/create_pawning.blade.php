@@ -61,24 +61,17 @@
 
                 <div class="form-row">
                     <label>ชื่อ-นามสกุล</label>
-                    <input value="{{ $member->fullname }}" disabled>
+                    <input value="{{ $member->fullname }}">
                 </div>
 
                 <div class="form-row">
                     <label>บัตรประชาชน</label>
-                    <input value="{{ $member->tax_number }}" disabled>
+                    <input value="{{ $member->tax_number }}">
                 </div>
 
                 <div class="form-row">
                     <label>เบอร์ติดต่อ</label>
-                    <input value="{{ $member->phone }}" disabled>
-                </div>
-
-                <div class="form-row">
-                    <label>สถานะ</label>
-                    <input class="status"
-                        value="{{ $member->status == 'new' ? 'ลูกค้าใหม่' : ($member->status == 'history' ? 'ลูกค้าเก่า' : 'มีปัญหา') }}"
-                        disabled>
+                    <input value="{{ $member->phone }}">
                 </div>
             </div>
 

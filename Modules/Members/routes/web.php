@@ -3,6 +3,11 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Members\Http\Controllers\MembersController;
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('members', MembersController::class)->names('members');
+// Route::middleware(['auth', 'verified'])->group(function () {
+//     Route::resource('members', MembersController::class)->names('members');
+// });
+
+Route::group([], function () {
+    Route::get('/member', [MembersController::class, 'index'])
+        ->name('members.index');
 });

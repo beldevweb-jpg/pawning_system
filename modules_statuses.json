@@ -4,5 +4,6 @@
     "Inventory": true,
     "Finance": true,
     "Commerce": true,
-    "Service": true
+    "Service": true,
+    "User": true
 }

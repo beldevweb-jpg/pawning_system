@@ -4,6 +4,8 @@ namespace Modules\Members\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
+use Modules\Members\Models\Member;
 
 class MembersController extends Controller
 {
@@ -12,7 +14,8 @@ class MembersController extends Controller
      */
     public function index()
     {
-        return view('members::index');
+        $member = Member::get();
+        return View('members::index', compact('member'));
     }
 
     /**
