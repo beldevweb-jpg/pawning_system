@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="{{ asset('css/customer.css') }}">
+    <title>Member report</title>
+    <link rel="stylesheet" href="{{ asset('css/table.css') }}">
 </head>
 
 <body>
@@ -24,11 +24,16 @@
                     @endforeach
                 </div>
             @endif
-            <div class="page-header">
-                <h2>ข้อมูลลูกค้า / ข้อมูลโทรศัพท์</h2>
+            <div class="header-left">
+        <h2>ข้อมูล user</h2>
+        <span class="subtitle">Customer Management</span>
+    </div>
 
-                <input type="text" class="search-box" placeholder="ค้นหา..." />
-            </div>
+    <div class="header-right">
+        <input type="text" class="search-box" placeholder="ค้นหา..." />
+
+    </div>
+    </div>
 
             <div class="table-wrapper">
                 <table>

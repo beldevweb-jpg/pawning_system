@@ -1,0 +1,184 @@
+/* =========================
+   RESET & BASE
+========================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Segoe UI", Tahoma, sans-serif;
+}
+
+body {
+    background: #eaf8ff;
+}
+
+/* =========================
+   LAYOUT
+========================= */
+.container {
+    min-height: 100vh;
+    padding: 30px;
+}
+
+.card {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+/* =========================
+   HEADER
+========================= */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 20px;
+}
+
+.header-left h2 {
+    font-size: 22px;
+    font-weight: 600;
+    color: #000;
+}
+
+.header-left .subtitle {
+    font-size: 13px;
+    color: #666;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* =========================
+   SEARCH
+========================= */
+.search-box {
+    width: 180px;
+    height: 34px;
+    padding: 6px 12px;
+    font-size: 14px;
+    border-radius: 10px;
+    border: 2px solid #000;
+    outline: none;
+}
+
+/* =========================
+   TABLE
+========================= */
+.table-wrapper {
+    border: 2px solid #000;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead {
+    background: #f5f5f5;
+}
+
+th,
+td {
+    padding: 10px;
+    font-size: 14px;
+    text-align: center;
+    border-bottom: 1px solid #000;
+    border-right: 1px solid #000;
+}
+
+th:last-child,
+td:last-child {
+    border-right: none;
+}
+
+/* =========================
+   EDIT COLUMN (แก้ไขข้อมูล)
+========================= */
+th.edit-col,
+td.edit-col {
+    width: 90px;
+    min-width: 90px;
+    padding: 6px;
+    text-align: center;
+}
+
+/* =========================
+   BUTTON
+========================= */
+.btn-edit {
+    padding: 4px 10px;
+    font-size: 12px;
+    border-radius: 8px;
+    border: 1.5px solid #000;
+    background: #000;
+    color: #fff;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.btn-edit:hover {
+    background: #333;
+}
+
+/* =========================
+   TABLE INTERACTION
+========================= */
+tbody tr:hover {
+    background: #eaf8ff;
+    cursor: pointer;
+}
+
+/* =========================
+   STATUS
+========================= */
+.status {
+    font-weight: 600;
+}
+
+.status.active {
+    color: #1fa600;
+}
+
+.status.pending {
+    color: #ff9800;
+}
+
+.status.closed {
+    color: #d32f2f;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .search-box {
+        width: 100%;
+    }
+
+    th,
+    td {
+        font-size: 12px;
+        padding: 8px;
+    }
+
+    th.edit-col,
+    td.edit-col {
+        width: 70px;
+        min-width: 70px;
+    }
+}
