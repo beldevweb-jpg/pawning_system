@@ -58,9 +58,18 @@
             </div>
 
             <div class="form-row">
-                <label>รูปบัตรประชาชน</label>
-                <input type="file" name="idcard_image" id="idcard-image" accept="image/*">
-            </div>
+    <label>รูปบัตรประชาชน</label>
+    <input
+        type="file"
+        name="idcard_images[]"
+        id="idcard-image"
+        accept="image/*"
+        capture="environment"
+        multiple
+    >
+
+    <div id="preview" style="display:flex; gap:10px; margin-top:10px;"></div>
+</div>
 
             <div class="action-buttons">
                 <button type="button" class="btn cancel" id="clearForm">

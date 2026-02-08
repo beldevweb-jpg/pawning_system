@@ -29,5 +29,27 @@ document.addEventListener("DOMContentLoaded", () => {
   toggleOther("selltype", "pawn-other", "typesell-other-input");
   toggleOther("product_type", "type-other", "type-other-input");
   toggleOther("brand", "brand-other", "brand-other-input");
+// =====================
+  // ถ่าย / อัปโหลดรูป + preview (จำกัด 2 รูป)
+  // =====================
+  const imageInput = document.getElementById("idcard-image");
+  const preview = document.getElementById("preview");
+
+  if (imageInput && preview) {
+    imageInput.addEventListener("change", () => {
+      preview.innerHTML = "";
+
+      const files = Array.from(imageInput.files).slice(0, 2);
+
+      files.forEach(file => {
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(file);
+        img.style.width = "120px";
+        img.style.borderRadius = "8px";
+        img.style.objectFit = "cover";
+        preview.appendChild(img);
+      });
+    });
+  }
 
 });

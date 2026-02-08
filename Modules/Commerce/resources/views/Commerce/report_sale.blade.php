@@ -9,6 +9,14 @@
 </head>
 
 <body>
+    <header class="header">
+            <div class="user">
+                <span class="avatar">👤</span>
+                <span>username</span>
+            </div>
+            <button type="button" class="logout">ออกจากระบบ</button>
+        </header>
+        
     <div class="container">
         <div class="card">
 

@@ -23,7 +23,13 @@
 
     </div>
 </div>
-
+    <header class="header">
+            <div class="user">
+                <span class="avatar">👤</span>
+                <span>username</span>
+            </div>
+            <button type="button" class="logout">ออกจากระบบ</button>
+        </header>
 
             <!-- TABLE -->
             <div class="table-wrapper">
