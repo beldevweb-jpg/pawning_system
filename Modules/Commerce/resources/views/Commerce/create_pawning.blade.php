@@ -98,7 +98,7 @@
                 <input class="input" id="type-other-input" name="type_category_other" value="{{ old('type_category_other') }}" placeholder="กรอกประเภทสินค้า" disabled>
             </div>
 
-            <div class="card">
+            <div class="card" id="model-wrapper">
                 <h2>ยี่ห้อ</h2>
 
                 <div class="option-grid">
@@ -140,6 +140,20 @@
                 <label style="display:block; margin-bottom:5px;">วาดรหัส</label>
                 <input class="input" name="locker_pass" type="text" value="{{ old('locker_pass') }}" placeholder="เช่น วาดเป็นตัว L">
             </div>
+
+            <div class="form-row">
+    <label>รูปบัตรประชาชน</label>
+    <input
+        type="file"
+        name="idcard_images[]"
+        id="idcard-image"
+        accept="image/*"
+        capture="environment"
+        multiple
+    >
+
+    <div id="preview" style="display:flex; gap:10px; margin-top:10px;"></div>
+</div>
 
             <div class="card">
                 <h2>ราคา</h2>
