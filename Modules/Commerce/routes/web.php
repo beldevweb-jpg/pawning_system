@@ -20,6 +20,6 @@ Route::group([], function () {
     route::get('/create_pawning/{id}', [CommerceController::class, 'create_pawning'])->name('commerce.create_pawning');
     route::post('/store_pawning', [CommerceController::class, 'store_pawning'])->name('commerce.store_pawning');
     route::get('/report_pawning', [CommerceController::class, 'report_pawning'])->name('commerce.report_pawning');
-    Route::get('/customer/{id}', [CommerceController::class, 'customer'])
-        ->name('commerce.customer');
+    Route::get('/report_member/{id}', [CommerceController::class, 'report_member'])
+        ->name('commerce.report_member');
 });

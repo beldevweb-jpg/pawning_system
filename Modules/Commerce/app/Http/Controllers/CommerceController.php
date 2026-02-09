@@ -33,7 +33,7 @@ class CommerceController extends Controller
                 return back()->withErrors(['error' => 'ไม่พบประวัติเครื่อง']);
             }
 
-            return redirect()->route('commerce.customer', $sale->id);
+            return redirect()->route('commerce.report_member', $sale->id);
         }
 
         if (!empty($tax_number)) {
@@ -45,7 +45,7 @@ class CommerceController extends Controller
                     ->withErrors(['error' => 'ไม่พบประวัติลูกค้า']);
             }
 
-            return redirect()->route('commerce.customer', $member->member_id);
+            return redirect()->route('commerce.report_member', $member->member_id);
         }
 
         return back()->withErrors(['error' => 'กรุณากรอกข้อมูลเพื่อค้นหา']);
@@ -173,16 +173,16 @@ class CommerceController extends Controller
         ]);
     }
 
-    public function customer($id)
+    public function report_member($id)
     {
         $member = Member::with('sales_r')
             ->where('member_id', $id)
             ->get();
 
-        return view('commerce::commerce.customer', compact('member'));
+        return view('commerce::commerce.report_member', compact('member'));
     }
 
-    // public function customer(Request $request)
+    // public function report_member(Request $request)
     // {
     //     $keyword = $request->keyword;
 
@@ -197,7 +197,7 @@ class CommerceController extends Controller
     //         })
     //         ->get();
 
-    //     return view('commerce::commerce.customer', compact('sales'));
+    //     return view('commerce::commerce.report_member', compact('sales'));
     // }
 
     public function index()

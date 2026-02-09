@@ -1,4 +1,4 @@
-/* RESET */
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600&display=swap');
 
 * {
     box-sizing: border-box;
@@ -11,6 +11,7 @@
 /* PAGE */
 
 body {
+    margin: 0;
     background: #eaf8ff;
 }
 
@@ -142,9 +143,11 @@ tbody tr:hover {
         align-items: flex-start;
         gap: 10px;
     }
+
     .search-box {
         width: 100%;
     }
+
     th,
     td {
         font-size: 12px;
