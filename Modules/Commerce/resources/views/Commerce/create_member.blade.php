@@ -14,9 +14,15 @@
     <header class="header">
         <div class="user">
             <span class="avatar">👤</span>
-            <span>username</span>
+            <span>{{ auth()->user()->name }}</span>
         </div>
-        <button class="logout">ออกจากระบบ</button>
+
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="logout">
+                ออกจากระบบ
+            </button>
+        </form>
     </header>
 
     <!-- TITLE -->
@@ -58,18 +64,12 @@
             </div>
 
             <div class="form-row">
-    <label>รูปบัตรประชาชน</label>
-    <input
-        type="file"
-        name="idcard_images[]"
-        id="idcard-image"
-        accept="image/*"
-        capture="environment"
-        multiple
-    >
+                <label>รูปบัตรประชาชน</label>
+                <input type="file" name="idcard_images[]" id="idcard-image" accept="image/*" capture="environment"
+                    multiple>
 
-    <div id="preview" style="display:flex; gap:10px; margin-top:10px;"></div>
-</div>
+                <div id="preview" style="display:flex; gap:10px; margin-top:10px;"></div>
+            </div>
 
             <div class="action-buttons">
                 <button type="button" class="btn cancel" id="clearForm">

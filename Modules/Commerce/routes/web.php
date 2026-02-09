@@ -3,15 +3,12 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Commerce\Http\Controllers\CommerceController;
 
-// Route::middleware(['auth', 'verified'])->group(function () {
-//     Route::resource('commerces', CommerceController::class)->names('commerce');
-// });
-
-Route::group([], function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     route::get('/create_search', [CommerceController::class, 'create_search'])->name('commerce.create_search');
     route::post('/store_create_search', [CommerceController::class, 'store_create_search'])->name('commerce.store_create_search');
     route::get('/create_member', [CommerceController::class, 'create_member'])->name('commerce.create_member');
     route::post('/store_create_member', [CommerceController::class, 'store_create_member'])->name('commerce.store_create_member');
+    route::get('/search_member', [CommerceController::class,], 'search_member')->name('commerce.search_member');
     route::get('/create_type_of_sale/{id}', [CommerceController::class, 'create_type_of_sale'])->name('commerce.create_type_of_sale');
     Route::post(
         '/store_type_of_sale/{id}',
@@ -22,4 +19,9 @@ Route::group([], function () {
     route::get('/report_pawning', [CommerceController::class, 'report_pawning'])->name('commerce.report_pawning');
     Route::get('/report_member/{id}', [CommerceController::class, 'report_member'])
         ->name('commerce.report_member');
+    Route::resource('commerces', CommerceController::class)->names('commerce');
 });
+
+// Route::group([], function () {
+   
+// });

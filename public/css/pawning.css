@@ -11,33 +11,35 @@ body {
   color: #2c3e50;
 }
 
-/* ===== HEADER ===== */
+/* HEADER */
 .header {
   display: flex;
   justify-content: space-between;
-  padding: 16px 20px;
-  background: #fff;
+  align-items: center;
+  padding: 14px 20px;
 }
 
 .user {
   display: flex;
   align-items: center;
   gap: 10px;
+  font-weight: 500;
 }
 
 .avatar {
   background: #e3ecff;
-  padding: 5px;
   border-radius: 50%;
+  padding: 6px 8px;
 }
 
 .logout {
   background: #ffffff;
-  color: #2b6cff;
-  border: 1px solid #2b6cff;
-  padding: 5px 15px;
+  border: none;
+  padding: 6px 14px;
   border-radius: 20px;
   cursor: pointer;
+  color: #2b6cff;
+  font-weight: 500;
 }
 
 /* ===== TITLE ===== */
@@ -173,30 +175,74 @@ body {
 }
 
 .msg {
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 10px;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 10px;
 }
-.msg.ok { background: #d4edda; color: #155724; }
-.msg.err { background: #f8d7da; color: #721c24; }
+
+.msg.ok {
+  background: #d4edda;
+  color: #155724;
+}
+
+.msg.err {
+  background: #f8d7da;
+  color: #721c24;
+}
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 480px) {
-  .container { padding: 0 12px 60px; }
-  .card { padding: 18px; }
-  .form-row { flex-direction: column; align-items: flex-start; }
-  .submit { flex-direction: column; }
-  .option-grid { grid-template-columns: 1fr 1fr; }
-  .option-other { grid-column: span 2; }
+  .container {
+    padding: 0 12px 60px;
+  }
+
+  .card {
+    padding: 18px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .submit {
+    flex-direction: column;
+  }
+
+  .option-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .option-other {
+    grid-column: span 2;
+  }
 }
 
 @media (max-width: 768px) {
-  .option-grid { grid-template-columns: repeat(2, 1fr); }
+  .option-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (min-width: 1024px) {
-  .container { grid-template-columns: 1fr 1fr; align-items: start; }
-  .card { width: 100%; }
-  .submit { grid-column: span 2; justify-content: space-between; max-width: 480px; margin: 40px auto 0; }
-  .submit button { flex: none; min-width: 200px; }
+  .container {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+
+  .card {
+    width: 100%;
+  }
+
+  .submit {
+    grid-column: span 2;
+    justify-content: space-between;
+    max-width: 480px;
+    margin: 40px auto 0;
+  }
+
+  .submit button {
+    flex: none;
+    min-width: 200px;
+  }
 }

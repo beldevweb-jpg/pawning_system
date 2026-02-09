@@ -11,12 +11,17 @@
 
 <body>
     <header class="header">
-        <div class="user-info">
-            <div class="avatar"></div>
+        <div class="user">
             <span class="avatar">👤</span>
-            <span class="username">username</span>
+            <span>{{ auth()->user()->name }}</span>
         </div>
-        <button class="logout">ออกจากระบบ</button>
+
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="logout">
+                ออกจากระบบ
+            </button>
+        </form>
     </header>
 
     <h1 class="title">โอ๋ โมบาย</h1>

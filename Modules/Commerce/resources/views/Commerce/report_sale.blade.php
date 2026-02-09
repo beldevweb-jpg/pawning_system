@@ -10,27 +10,33 @@
 
 <body>
     <header class="header">
-            <div class="user">
-                <span class="avatar">👤</span>
-                <span>username</span>
-            </div>
-            <button type="button" class="logout">ออกจากระบบ</button>
-        </header>
-        
+        <div class="user">
+            <span class="avatar">👤</span>
+            <span>{{ auth()->user()->name }}</span>
+        </div>
+
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="logout">
+                ออกจากระบบ
+            </button>
+        </form>
+    </header>
+
     <div class="container">
         <div class="card">
 
             <div class="page-header">
-    <div class="header-left">
-        <h2>ประวัติการขาย</h2>
-        <span class="subtitle">user Management</span>
-    </div>
+                <div class="header-left">
+                    <h2>ประวัติการขาย</h2>
+                    <span class="subtitle">user Management</span>
+                </div>
 
-    <div class="header-right">
-        <input type="text" class="search-box" placeholder="ค้นหา..." />
+                <div class="header-right">
+                    <input type="text" class="search-box" placeholder="ค้นหา..." />
 
-    </div>
-</div>
+                </div>
+            </div>
 
 
             <!-- TABLE -->
@@ -38,13 +44,13 @@
                 <table>
                     <thead>
                         <tr>
-                                <th>ลำดับ</th>
-                                <th>รหัสรายการ</th>
-                                <th>ชื่อรายการ</th>
-                                <th>ชื่อพนักงานขาย</th>
-                                <th>ชื่อลูกค้า</th>
-                                <th>สถานะการขาย</th>
-                                <th class="edit-col" >แก้ไขข้อมูล</th>
+                            <th>ลำดับ</th>
+                            <th>รหัสรายการ</th>
+                            <th>ชื่อรายการ</th>
+                            <th>ชื่อพนักงานขาย</th>
+                            <th>ชื่อลูกค้า</th>
+                            <th>สถานะการขาย</th>
+                            <th class="edit-col">แก้ไขข้อมูล</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -56,22 +62,22 @@
                             <td>admin</td>
                             <td>admin</td>
                             <td class="status active">ปกติ</td>
-                            <td class="edit-col" ><button class="btn-edit">Edit</button></td>
+                            <td class="edit-col"><button class="btn-edit">Edit</button></td>
                         </tr>
                     </tbody>
                     <tfoot>
-    <tr class="table-summary">
-        <td colspan="5">รวมยอดขายทั้งหมด</td>
-        <td class="summary-price">฿ 12,500.00</td>
-        <td class="edit-col">-</td>
-    </tr>
-</tfoot>
+                        <tr class="table-summary">
+                            <td colspan="5">รวมยอดขายทั้งหมด</td>
+                            <td class="summary-price">฿ 12,500.00</td>
+                            <td class="edit-col">-</td>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
 
         </div>
     </div>
 
-</body> 
+</body>
 
 </html>

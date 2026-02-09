@@ -15,7 +15,31 @@ body {
 .header {
   display: flex;
   justify-content: space-between;
-  padding: 16px 20px;
+  align-items: center;
+  padding: 14px 20px;
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+}
+
+.avatar {
+  background: #e3ecff;
+  border-radius: 50%;
+  padding: 6px 8px;
+}
+
+.logout {
+  background: #ffffff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  color: #2b6cff;
+  font-weight: 500;
 }
 
 .container {

@@ -13,23 +13,29 @@
         <div class="card">
 
             <div class="page-header">
-    <div class="header-left">
-        <h2>ข้อมูล user</h2>
-        <span class="subtitle">user Management</span>
-    </div>
+                <div class="header-left">
+                    <h2>ข้อมูล user</h2>
+                    <span class="subtitle">user Management</span>
+                </div>
 
-    <div class="header-right">
-        <input type="text" class="search-box" placeholder="ค้นหา..." />
+                <div class="header-right">
+                    <input type="text" class="search-box" placeholder="ค้นหา..." />
 
-    </div>
-</div>
-    <header class="header">
-            <div class="user">
-                <span class="avatar">👤</span>
-                <span>username</span>
+                </div>
             </div>
-            <button type="button" class="logout">ออกจากระบบ</button>
-        </header>
+            <header class="header">
+                <div class="user">
+                    <span class="avatar">👤</span>
+                    <span>{{ auth()->user()->name }}</span>
+                </div>
+
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="logout">
+                        ออกจากระบบ
+                    </button>
+                </form>
+            </header>
 
             <!-- TABLE -->
             <div class="table-wrapper">
@@ -41,7 +47,7 @@
                             <th>password</th>
                             <th>role</th>
                             <th>status</th>
-                            <th class="edit-col" >แก้ไขข้อมูล</th>
+                            <th class="edit-col">แก้ไขข้อมูล</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -52,7 +58,7 @@
                             <td>123456</td>
                             <td>admin</td>
                             <td class="status active">ปกติ</td>
-                            <td class="edit-col" ><button class="btn-edit">Edit</button></td>
+                            <td class="edit-col"><button class="btn-edit">Edit</button></td>
                         </tr>
                     </tbody>
                 </table>
@@ -61,6 +67,6 @@
         </div>
     </div>
 
-</body> 
+</body>
 
 </html>

@@ -9,6 +9,21 @@
     <script src="{{ asset('js/app.js') }}"></script>
 </head>
 
+<header class="header">
+    <div class="user">
+        <span class="avatar">👤</span>
+        <span>{{ auth()->user()->name }}</span>
+    </div>
+
+    <form method="POST" action="{{ route('logout') }}">
+        @csrf
+        <button type="submit" class="logout">
+            ออกจากระบบ
+        </button>
+    </form>
+</header>
+
+
 <body>
     <main class="page">
         <h1 class="page-title">ค้นหาประวัติ</h1>

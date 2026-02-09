@@ -14,9 +14,15 @@
     <header class="header">
         <div class="user">
             <span class="avatar">👤</span>
-            <span>username</span>
+            <span>{{ auth()->user()->name }}</span>
         </div>
-        <button type="button" class="logout">ออกจากระบบ</button>
+
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="logout">
+                ออกจากระบบ
+            </button>
+        </form>
     </header>
 
     <div class="container">
@@ -41,46 +47,44 @@
                 <div class="header-left">
                     <h2>ข้อมูล user</h2>
                 </div>
+                <form method="GET" id="searchForm" action="{{ route('commerce.search_member') }}">
+                    <input type="text" name="keyword" placeholder="ค้นหา..." value="{{ request('keyword') }}"
+                        autocomplete="off" oninput="document.getElementById('searchForm').submit();">
+                </form>
 
-                <div class="header-right">
-                    <input type="text" class="search-box" placeholder="ค้นหา..." />
+                <!-- Table -->
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ลำดับ</th>
+                                <th>ยี่ห้อ</th>
+                                <th>รุ่น</th>
+                                <th>รหัสเครื่อง</th>
+                                <th>ชื่อลูกค้า</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach ($member as $item)
+                                @forelse ($item->sales_r as $sale)
+                                    <tr class="clickable-row"
+                                        onclick="window.location='{{ route('commerce.create_pawning', $item->sale_id) }}'">
+                                        <td>{{ $loop->iteration }}</td>
+                                        <td>{{ $sale->brand }}</td>
+                                        <td>{{ $sale->model }}</td>
+                                        <td>{{ $sale->serial_number }}</td>
+                                        <td>{{ $item->fullname }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6">ไม่พบข้อมูล</td>
+                                    </tr>
+                                @endforelse
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
-            </div>
-
-
-            <!-- Table -->
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ลำดับ</th>
-                            <th>ยี่ห้อ</th>
-                            <th>รุ่น</th>
-                            <th>รหัสเครื่อง</th>
-                            <th>ชื่อลูกค้า</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        @foreach ($member as $item)
-                            @forelse ($item->sales_r as $sale)
-                                <tr class="clickable-row"
-                                    onclick="window.location='{{ route('commerce.create_pawning', $item->sale_id) }}'">
-                                    <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $sale->brand }}</td>
-                                    <td>{{ $sale->model }}</td>
-                                    <td>{{ $sale->serial_number }}</td>
-                                    <td>{{ $item->fullname }}</td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="6">ไม่พบข้อมูล</td>
-                                </tr>
-                            @endforelse
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
 
 
 

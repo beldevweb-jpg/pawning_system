@@ -1,10 +1,11 @@
 <?php
 
-namespace Modules\User\Http\Controllers;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Modules\User\Models\user;
+use App\Models\User;
+
 
 class UserController extends Controller
 {
@@ -13,8 +14,9 @@ class UserController extends Controller
      */
     public function index()
     {
-        $user = user::get();
-        return view('user::index', compact('user'));
+        $users = User::latest()->paginate(10);
+
+        return view('users.index', compact('users'));
     }
 
     /**
@@ -22,37 +24,47 @@ class UserController extends Controller
      */
     public function create()
     {
-        return view('user::create');
+        //
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request) {}
+    public function store(Request $request)
+    {
+        //
+    }
 
     /**
-     * Show the specified resource.
+     * Display the specified resource.
      */
-    public function show($id)
+    public function show(string $id)
     {
-        return view('user::show');
+        //
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($id)
+    public function edit(string $id)
     {
-        return view('user::edit');
+        $user = user::find($id);
+        return view('user::user.edit', compact('user') );
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id) {}
+    public function update(Request $request, string $id)
+    {
+        //
+    }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id) {}
+    public function destroy(string $id)
+    {
+        //
+    }
 }

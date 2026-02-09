@@ -18,26 +18,39 @@
                 <h2>เข้าสู่ระบบ</h2>
                 <span class="subtitle">User Login</span>
             </div>
+            @if (session('success'))
+                <div class="msg ok">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if ($errors->any())
+                <div class="msg err">
+                    @foreach ($errors->all() as $error)
+                        <div>- {{ $error }}</div>
+                    @endforeach
+                </div>
+            @endif
 
             <!-- FORM -->
-            <form class="login-form">
+            <form class="login-form" method="POST" action="{{ route('login') }}">
+                @csrf
 
                 <div class="form-group">
                     <label>ชื่อผู้ใช้</label>
-                    <input type="text" placeholder="Username" required>
+                    <input type="text" name="username" placeholder="Username" value="{{ old('username') }}" required>
                 </div>
 
                 <div class="form-group">
                     <label>รหัสผ่าน</label>
-                    <input type="password" placeholder="Password" required>
+                    <input type="password" name="password" placeholder="Password" required>
                 </div>
 
-                <!-- ACTION -->
                 <div class="form-action">
                     <button type="submit" class="btn-login">เข้าสู่ระบบ</button>
                 </div>
-
             </form>
+
 
         </div>
     </div>

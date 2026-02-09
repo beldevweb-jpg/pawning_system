@@ -133,13 +133,12 @@ class CommerceController extends Controller
             'sale_id' => 'required|exists:sales,id',
             'subcategories' => 'required',
             'type_category' => 'required',
-            'brand' => 'required|string',
-            'model' => 'required|string',
             'price' => 'required|numeric',
             'type_price' => 'required|string',
             'lock_pass' => 'required|string',
             'serial_number' => 'required|string',
             'note' => 'nullable|string',
+            'idcard_images' => 'required',
         ]);
 
         $member_id = null;
@@ -150,8 +149,6 @@ class CommerceController extends Controller
             $member_id = $sale->member_id;
 
             $updateData = [
-                'brand' => $request->brand,
-                'model' => $request->model,
                 'serial_number' => $request->serial_number,
                 'note' => $request->note,
                 'type_price' => $request->type_price,
@@ -159,6 +156,7 @@ class CommerceController extends Controller
                 'price' => $request->price,
                 'type_category' => $request->type_category,
                 'subcategories' => $request->subcategories,
+                'idcard_images' => $request->required,
             ];
 
             if ($request->filled('type_serve')) {
@@ -178,27 +176,34 @@ class CommerceController extends Controller
         $member = Member::with('sales_r')
             ->where('member_id', $id)
             ->get();
+        // dd($member);
 
         return view('commerce::commerce.report_member', compact('member'));
     }
 
-    // public function report_member(Request $request)
-    // {
-    //     $keyword = $request->keyword;
+    public function search_member(Request $request)
+    {
+        $keyword = trim($request->keyword);
 
-    //     $sales = Sale::with('member_r')
-    //         ->where(function ($q) use ($keyword) {
+        $query = Member::query();
 
-    //             $q->where('serial_number', 'like', "%{$keyword}%")
+        if ($keyword) {
+            $query->whereHas('sales_r', function ($q) use ($keyword) {
+                $q->where('brand', 'like', "%{$keyword}%")
+                    ->orWhere('model', 'like', "%{$keyword}%")
+                    ->orWhere('serial_number', 'like', "%{$keyword}%");
+            });
+        }
 
-    //                 ->orWhereHas('member_r', function ($q2) use ($keyword) {
-    //                     $q2->where('tax_number', 'like', "%{$keyword}%");
-    //                 });
-    //         })
-    //         ->get();
+        $member = $query
+            ->with('sales_r')
+            ->orderBy('member_id', 'desc')
+            ->paginate(20);
 
-    //     return view('commerce::commerce.report_member', compact('sales'));
-    // }
+        return view('commerce::commerce.customer', compact('member'));
+    }
+
+
 
     public function index()
     {

@@ -32,17 +32,20 @@
                 @csrf
                 <div class="form-group">
                     <label>ชื่อนามสกุล</label>
-                    <input type="text" name="name" placeholder="กรอกชื่อนามสกุล" required>
+                    <input type="text" name="name" placeholder="กรอกชื่อนามสกุล"
+                        value="{{ old('name', $user->name ?? '') }}" required>
                 </div>
 
                 <div class="form-group">
                     <label>เบอร์โทรศัพท์</label>
-                    <input type="phone" name="phone" placeholder="เบอร์โทรศัพท์">
+                    <input type="phone" name="phone" placeholder="เบอร์โทรศัพท์"
+                        value="{{ old('phone', $user->phone ?? '') }}">
                 </div>
 
                 <div class="form-group">
                     <label>ชื่อผู้ใช้ (Username)</label>
-                    <input type="text" name="username" placeholder="กรอกชื่อผู้ใช้" required>
+                    <input type="text" name="username" placeholder="กรอกชื่อผู้ใช้"
+                        value="{{ old('username', $user->username ?? '') }}" required>
                 </div>
 
 
@@ -79,12 +82,9 @@
                     <a href="/login" class="btn-cancel">ยกเลิก</a>
                     <button type="submit" class="btn-save">สมัครสมาชิก</button>
                 </div>
-
             </form>
-
         </div>
     </div>
-
 </body>
 
 </html>
