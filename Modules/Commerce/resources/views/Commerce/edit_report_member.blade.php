@@ -9,22 +9,20 @@
 </head>
 
 <body>
+    <header style="display:flex;justify-content:space-between;padding:15px;">
+        <div>
+            👤 {{ auth()->user()->name ?? '' }}
+        </div>
 
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button style="background:red;color:white;border:none;padding:8px 12px;border-radius:6px">
+                ออกจากระบบ
+            </button>
+        </form>
+    </header>
     <div class="container">
         <div class="card">
-            <header class="header">
-                <div class="user">
-                    <span class="avatar">👤</span>
-                    <span>{{ auth()->user()->name }}</span>
-                </div>
-
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="logout">
-                        ออกจากระบบ
-                    </button>
-                </form>
-            </header>
             <h1 class="title">แก้ไขข้อมูลลูกค้า</h1>
             <form action="{{ route('commerce.store_create_member') }}" method="POST" enctype="multipart/form-data">
                 @csrf

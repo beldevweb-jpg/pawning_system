@@ -9,7 +9,18 @@
 </head>
 
 <body>
+    <header style="display:flex;justify-content:space-between;padding:15px;">
+        <div>
+            👤 {{ auth()->user()->name ?? '' }}
+        </div>
 
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button style="background:red;color:white;border:none;padding:8px 12px;border-radius:6px">
+                ออกจากระบบ
+            </button>
+        </form>
+    </header>
     <div class="container">
         <div class="card">
 
@@ -18,19 +29,6 @@
                 <h2>สมัครผู้ใช้งาน</h2>
                 <span class="subtitle">User Registration</span>
             </div>
-            <header class="header">
-                <div class="user">
-                    <span class="avatar">👤</span>
-                    <span>{{ auth()->user()->name }}</span>
-                </div>
-
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="logout">
-                        ออกจากระบบ
-                    </button>
-                </form>
-            </header>
             <!-- FORM -->
             <form class="register-form">
 

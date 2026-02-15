@@ -17,7 +17,7 @@ class Member extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $table = 'members'; // ชื่อตาราง (แนะนำ plural)
+    protected $table = 'members';
     protected $primaryKey = 'member_id';
     public $incrementing = true;
     protected $keyType = 'int';
@@ -29,6 +29,11 @@ class Member extends Model
         'phone',
         'email',
         'date_of_birth',
+        'idcard_image', // ⭐ เพิ่มด้วย (แนะนำ)
+    ];
+
+    protected $casts = [
+        'idcard_image' => 'array',
     ];
 
     public function sales_r(): HasMany

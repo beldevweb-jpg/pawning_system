@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
         2. ฟังก์ชัน Toggle Input "อื่นๆ" (Generic Function)
     ===================== */
     function toggleOther(groupName, otherRadioId, inputId) {
+
         const radios = document.querySelectorAll(`input[name="${groupName}"]`);
         const otherRadio = document.getElementById(otherRadioId);
         const input = document.getElementById(inputId);
@@ -18,12 +19,16 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!radios.length || !otherRadio || !input) return;
 
         const update = () => {
+
             if (otherRadio.checked) {
+
                 input.disabled = false;
-                // input.focus(); // เอาออกได้ถ้าไม่อยากให้เด้งไปหาทุกครั้งที่โหลดหน้า
+
             } else {
+
                 input.disabled = true;
-                input.value = ""; // ล้างค่าเมื่อปิด
+                input.value = "";
+
             }
         };
 
@@ -31,12 +36,12 @@ document.addEventListener("DOMContentLoaded", () => {
             radio.addEventListener("change", update);
         });
 
-        update(); // เรียกทำงานทันทีเพื่อตรวจสอบค่าเก่าตอนโหลดหน้า
+        update();
     }
 
     // === เรียกใช้ Toggle ช่องอื่นๆ ===
     // 1. สถานะ (วาง/ต่อ/ไถ่/อื่นๆ)
-    toggleOther("subcategories", "pawn-other", "typesell-other-input");
+    toggleOther("other_type", "pawn-other", "typesell-other-input");
     // 2. ประเภทสินค้า (มือถือ/Tablet/อื่นๆ)
     toggleOther("type_category", "type-other", "type-other-input");
     // 3. ยี่ห้อ (iPhone/.../อื่นๆ)
@@ -60,12 +65,14 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         // ตรวจสอบเงื่อนไข
-        if (selectedValue === "มือถือ" || selectedValue === "Tablet") {
+        if (selectedValue === "phone" || selectedValue === "Tablet") {
             modelWrapper.classList.remove('hidden');
         } else {
             modelWrapper.classList.add('hidden');
             // ล้างค่าในช่องรุ่นเมื่อถูกซ่อน
-            const modelInput = modelWrapper.querySelector('input');
+            modelWrapper.querySelectorAll('input[type="text"]').forEach(input => {
+                input.value = "";
+            });
             if (modelInput) modelInput.value = "";
         }
     }
@@ -116,7 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
         submitBtn.addEventListener("click", (e) => {
             // ใช้ type="button" ที่ปุ่ม submit หรือเช็ค e.preventDefault()
             // หรือถ้าปุ่มเป็น type="submit" ให้ return true/false ใน onsubmit
-            
+
             // ในที่นี้ถ้ากด Cancel ให้หยุดการส่งข้อมูล
             if (!confirm("ยืนยันการทำรายการหรือไม่ ?")) {
                 e.preventDefault();
@@ -134,20 +141,20 @@ document.addEventListener("DOMContentLoaded", () => {
             document.querySelectorAll("input").forEach(input => {
                 // ล้างค่า text, number, etc.
                 if (input.type !== "submit" && input.type !== "button" && input.type !== "hidden") {
-                   input.value = "";
+                    input.value = "";
                 }
-                
+
                 // ล้างค่า radio, checkbox
                 if (input.type === "radio" || input.type === "checkbox") {
                     input.checked = false;
                 }
-                
+
                 // Reset disabled state (ถ้าจำเป็น)
                 if (input.classList.contains('input') && input.disabled === false && input.name.includes('_other')) {
-                   input.disabled = true;
+                    input.disabled = true;
                 }
             });
-            
+
             // Re-check visibility logic
             handleModelVisibility();
         });
@@ -177,3 +184,62 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 });
+
+const input = document.getElementById('idcardInput');
+const preview = document.getElementById('preview');
+
+input.addEventListener('change', function () {
+
+    preview.innerHTML = "";
+
+    [...this.files].forEach((file, index) => {
+
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+
+            const box = document.createElement('div');
+            box.style.position = 'relative';
+
+            box.innerHTML = `
+                <img src="${e.target.result}"
+                     style="width:120px;height:80px;object-fit:cover;border-radius:8px;">
+                
+                <button type="button"
+                        onclick="removeImage(${index})"
+                        style="
+                            position:absolute;
+                            top:-5px;
+                            right:-5px;
+                            background:red;
+                            color:white;
+                            border:none;
+                            border-radius:50%;
+                            width:22px;
+                            height:22px;
+                            cursor:pointer;">
+                    x
+                </button>
+            `;
+
+            preview.appendChild(box);
+        }
+
+        reader.readAsDataURL(file);
+    });
+});
+
+function removeImage(index) {
+
+    const dt = new DataTransfer();
+    const files = input.files;
+
+    for (let i = 0; i < files.length; i++) {
+        if (i !== index) {
+            dt.items.add(files[i]);
+        }
+    }
+
+    input.files = dt.files;
+    input.dispatchEvent(new Event('change'));
+}

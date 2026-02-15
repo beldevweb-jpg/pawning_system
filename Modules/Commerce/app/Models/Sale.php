@@ -26,7 +26,6 @@ class Sale extends Model
         'lock_pass',
         'others',
         'type_category',
-        'subcategories',
         'type_serve',
         'status',
     ];

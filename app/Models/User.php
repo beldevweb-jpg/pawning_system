@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+// use 
 
 class User extends Authenticatable
 {
@@ -56,5 +57,8 @@ class User extends Authenticatable
         return 'username';
     }
 
-    
+    public function expenses()
+    {
+        return $this->hasMany(Expenses::class, 'user_id', 'user_id');
+    }
 }

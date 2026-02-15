@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User report</title>
+    <title>ประวัติการขาย</title>
     <link rel="stylesheet" href="{{ asset('css/table.css') }}">
 </head>
 
@@ -26,7 +26,7 @@
 
             <div class="page-header">
                 <div class="header-left">
-                    <h2>ข้อมูล user</h2>
+                    <h2>ประวัติการขาย</h2>
                     <span class="subtitle">user Management</span>
                 </div>
 
@@ -35,34 +35,40 @@
 
                 </div>
             </div>
-
-
-
             <!-- TABLE -->
             <div class="table-wrapper">
-                <table>
-                    <thead>
+                <tbody>
+                    @forelse ($sales as $sale)
                         <tr>
-                            <th>ลำดับ</th>
-                            <th>username</th>
-                            <th>password</th>
-                            <th>role</th>
-                            <th>status</th>
-                            <th class="edit-col">แก้ไขข้อมูล</th>
+                            <td>{{ $sales->firstItem() + $loop->index }}</td>
+
+                            <td>{{ $sale->id }}</td>
+
+                            <td>{{ $sale->product_name ?? '-' }}</td>
+
+                            <td>{{ $sale->user_r->name ?? '-' }}</td>
+
+                            <td>{{ $sale->member_r->name ?? '-' }}</td>
+
+                            <td class="status active">
+                                {{ $sale->status ?? 'ปกติ' }}
+                            </td>
+
+                            <td class="edit-col">
+                                <a href="{{ route('commerce.edit_sale', $sale->id) }}" class="btn-edit">
+                                    Edit
+                                </a>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <!-- ตัวอย่างข้อมูล -->
+                    @empty
                         <tr>
-                            <td>1</td>
-                            <td>pao</td>
-                            <td>123456</td>
-                            <td>admin</td>
-                            <td class="status active">ปกติ</td>
-                            <td class="edit-col"><button class="btn-edit">Edit</button></td>
+                            <td colspan="7" style="text-align:center;">
+                                ไม่มีข้อมูล
+                            </td>
                         </tr>
-                    </tbody>
-                </table>
+                    @endforelse
+                </tbody>
+
             </div>
 
         </div>

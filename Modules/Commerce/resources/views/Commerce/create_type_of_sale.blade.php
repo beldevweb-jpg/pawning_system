@@ -10,64 +10,55 @@
 </head>
 
 <body>
-    <header class="header">
-        <div class="user">
-            <span class="avatar">👤</span>
-            <span>{{ auth()->user()->name }}</span>
+
+    <header style="display:flex;justify-content:space-between;padding:15px;">
+        <div>
+            👤 {{ auth()->user()->name ?? '' }}
         </div>
 
         <form method="POST" action="{{ route('logout') }}">
             @csrf
-            <button type="submit" class="logout">
+            <button style="background:red;color:white;border:none;padding:8px 12px;border-radius:6px">
                 ออกจากระบบ
             </button>
         </form>
     </header>
 
     <h1 class="title">โอ๋ โมบาย</h1>
-    {{ $member->fullname }}
-    <form method="POST" action="{{ route('commerce.store_type_of_sale', ['id' => $member->member_id]) }}">
-        @csrf
 
-        <main class="container">
+    <h2>{{ $member->fullname }}</h2>
 
-            @if (session('success'))
-                <div class="msg ok">
-                    {{ session('success') }}
-                </div>
-            @endif
+    <main class="container">
+        @if (session('success'))
+            <div class="msg ok">
+                {{ session('success') }}
+            </div>
+        @endif
 
-            @if ($errors->any())
-                <div class="msg err">
-                    @foreach ($errors->all() as $error)
-                        <div>- {{ $error }}</div>
-                    @endforeach
-                </div>
-            @endif
+        @if ($errors->any())
+            <div class="msg err">
+                @foreach ($errors->all() as $error)
+                    <div>- {{ $error }}</div>
+                @endforeach
+            </div>
+        @endif
+        <section class="menu-card">
+            <a href="{{ route('commerce.create_pawning', $member->member_id) }}" class="menu-item btn-pawm">
+                ขาย
+            </a>
 
-            @isset($sale)
-                <input type="hidden" name="sale_id" value="{{ $sale->id }}">
-            @endisset
+            <a href="{{ route('commerce.create_pawning', $member->member_id) }}" class="menu-item btn-pawm">
+                บริการ
+            </a>
 
-            @isset($member)
-                <input type="hidden" name="member_id" value="{{ $member->member_id }}">
-            @endisset
+            <a href="{{ route('commerce.create_sellfront', $member->member_id) }}" class="menu-item btn-pawm">
+                ขายหน้าร้าน
+            </a>
+        </section>
 
-            <section class="menu-card">
-                <button type="submit" name="type" value="pawn" class="menu-item">
-                    ขาย
-                </button>
 
-                <button type="submit" name="type" value="counter" class="menu-item">
-                    ขายหน้าร้าน
-                </button>
-
-                <button type="submit" name="type" value="service" class="menu-item">
-                    บริการ
-                </button>
-            </section>
-    </form>
     </main>
 </body>
+
 
 </html>

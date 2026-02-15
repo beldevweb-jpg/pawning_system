@@ -9,20 +9,18 @@
     <script src="{{ asset('js/app.js') }}"></script>
 </head>
 
-<header class="header">
-    <div class="user">
-        <span class="avatar">👤</span>
-        <span>{{ auth()->user()->name }}</span>
+<header style="display:flex;justify-content:space-between;padding:15px;">
+    <div>
+        👤 {{ auth()->user()->name ?? '' }}
     </div>
 
     <form method="POST" action="{{ route('logout') }}">
         @csrf
-        <button type="submit" class="logout">
+        <button style="background:red;color:white;border:none;padding:8px 12px;border-radius:6px">
             ออกจากระบบ
         </button>
     </form>
 </header>
-
 
 <body>
     <main class="page">

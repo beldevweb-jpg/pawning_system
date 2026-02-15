@@ -9,17 +9,14 @@
 </head>
 
 <body>
-
-    <!-- Top Header -->
-    <header class="header">
-        <div class="user">
-            <span class="avatar">👤</span>
-            <span>{{ auth()->user()->name }}</span>
+    <header style="display:flex;justify-content:space-between;padding:15px;">
+        <div>
+            👤 {{ auth()->user()->name ?? '' }}
         </div>
 
         <form method="POST" action="{{ route('logout') }}">
             @csrf
-            <button type="submit" class="logout">
+            <button style="background:red;color:white;border:none;padding:8px 12px;border-radius:6px">
                 ออกจากระบบ
             </button>
         </form>
@@ -49,19 +46,31 @@
                 </div>
                 <form method="GET" id="searchForm" action="{{ route('commerce.search_member') }}">
                     <input type="text" name="keyword" placeholder="ค้นหา..." value="{{ request('keyword') }}"
-                        autocomplete="off" oninput="document.getElementById('searchForm').submit();">
+                        autocomplete="off" id="searchInput">
                 </form>
 
+                <script>
+                    let timer;
+
+                    document.getElementById('searchInput').addEventListener('input', function() {
+                        clearTimeout(timer);
+                        timer = setTimeout(() => {
+                            document.getElementById('searchForm').submit();
+                        }, 500); // รอ 0.5 วิ
+                    });
+                </script>
                 <!-- Table -->
                 <div class="table-wrapper">
                     <table>
                         <thead>
                             <tr>
                                 <th>ลำดับ</th>
+                                <th>เลขตั๋ว</th>
                                 <th>ยี่ห้อ</th>
                                 <th>รุ่น</th>
                                 <th>รหัสเครื่อง</th>
                                 <th>ชื่อลูกค้า</th>
+                                <th>ประเภทบริการ</th>
                             </tr>
                         </thead>
 
@@ -69,12 +78,20 @@
                             @foreach ($member as $item)
                                 @forelse ($item->sales_r as $sale)
                                     <tr class="clickable-row"
-                                        onclick="window.location='{{ route('commerce.create_pawning', $item->sale_id) }}'">
+                                        onclick="window.location='{{ route('commerce.show_sale', $sale->id) }}'">
                                         <td>{{ $loop->iteration }}</td>
+                                        <td>{{ $sale->id }}</td>
                                         <td>{{ $sale->brand }}</td>
                                         <td>{{ $sale->model }}</td>
                                         <td>{{ $sale->serial_number }}</td>
                                         <td>{{ $item->fullname }}</td>
+                                        <td>
+                                            @if ($sale->type_serve == 'pawm')
+                                                จำนำ
+                                            @else
+                                                ขาย
+                                            @endif
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr>

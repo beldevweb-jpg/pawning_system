@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Modules\Commerce\Models\Sale;
 use Modules\Members\Models\Member;
 use Illuminate\Support\Str;
+use Modules\Commerce\Models\Expenses;
 
 class CommerceController extends Controller
 {
@@ -51,12 +52,10 @@ class CommerceController extends Controller
         return back()->withErrors(['error' => 'กรุณากรอกข้อมูลเพื่อค้นหา']);
     }
 
-
-
     public function create_type_of_sale($id)
     {
+        // dd($id);
         $member = Member::findOrFail($id);
-
         return view('commerce::commerce.create_type_of_sale', compact('member'));
     }
 
@@ -94,82 +93,153 @@ class CommerceController extends Controller
             ->route('commerce.create_type_of_sale', ['id' => $member->member_id]);
     }
 
-    public function store_create_type_of_sale(Request $request, $id)
-    {
-        // validate
-        $request->validate([
-            'type' => 'required|string'
-        ]);
-
-        // หา member จาก id ที่มาจาก route
-        $member = Member::findOrFail($id);
-
-        $sale = new Sale();
-        $sale->type_serve = $request->type;
-        $sale->member_id = $member->member_id;
-        $sale->save();
-
-        $member->sale_id = $sale->id;
-        $member->save();
-
-        return redirect()->route('commerce.create_pawning', [
-            'id' => $sale->id
-        ]);
-    }
-
-
     // ฟอร์มแสดงการจำนำ
     public function create_pawning($id)
     {
-        $sale = Sale::findOrFail($id);
-        $member = Member::findOrFail($sale->member_id);
+        $member = Member::findOrFail($id);
+
+        $sale = Sale::where('member_id', $id)->first() ?? new Sale();
 
         return view('commerce::commerce.create_pawning', compact('sale', 'member'));
     }
 
-    public function store_pawning(Request $request)
+
+    // public function store_pawning(Request $request)
+    // {
+    //     $request->validate([
+    //         'sale_id' => 'required|exists:sales,id',
+    //         'subcategories' => 'required',
+    //         'type_category' => 'required',
+    //         'price' => 'required|numeric',
+    //         'type_price' => 'required|string',
+    //         'lock_pass' => 'required|string',
+    //         'serial_number' => 'required|string',
+    //         'note' => 'nullable|string',
+    //         'idcard_images' => 'required',
+    //     ]);
+
+    //     $member_id = null;
+
+    //     DB::transaction(function () use ($request, &$member_id) {
+
+    //         $sale = Sale::findOrFail($request->sale_id);
+    //         $member_id = $sale->member_id;
+
+    //         $updateData = [
+    //             'serial_number' => $request->serial_number,
+    //             'note' => $request->note,
+    //             'type_price' => $request->type_price,
+    //             'lock_pass' => $request->lock_pass,
+    //             'price' => $request->price,
+    //             'type_category' => $request->type_category,
+    //             'subcategories' => $request->subcategories,
+    //             'idcard_images' => $request->required,
+    //         ];
+
+    //         if ($request->filled('type_serve')) {
+    //             $updateData['type_serve'] = $request->type_serve;
+    //         }
+
+    //         $sale->update($updateData);
+    //     });
+
+    //     return redirect()->route('commerce.create_search', [
+    //         'member_id' => $member_id
+    //     ]);
+    // }
+
+    public function store_pawning(Request $request, $id)
     {
+        // dd($request->all(), $id);
         $request->validate([
-            'sale_id' => 'required|exists:sales,id',
-            'subcategories' => 'required',
-            'type_category' => 'required',
-            'price' => 'required|numeric',
-            'type_price' => 'required|string',
-            'lock_pass' => 'required|string',
+            'type_category' => 'required|string',
+
+            'brand' => 'nullable|string',
+            'model' => 'nullable|string',
+
+            'locker_pass' => 'nullable|string',
+            'drawn_lock' => 'nullable|string',
+
             'serial_number' => 'required|string',
+
+            'cash' => 'nullable|numeric|min:0',
+            'transfer' => 'nullable|numeric|min:0',
+
             'note' => 'nullable|string',
-            'idcard_images' => 'required',
+            'appointment_date' => 'nullable|date',
+
+            'product_images.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'bill' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+
         ]);
 
-        $member_id = null;
+        $cash = $request->cash ?? 0;
+        $transfer = $request->transfer ?? 0;
+        $totalPrice = $cash + $transfer;
 
-        DB::transaction(function () use ($request, &$member_id) {
+        if ($totalPrice <= 0) {
+            return back()
+                ->withErrors(['payment' => 'กรุณาระบุจำนวนเงิน'])
+                ->withInput();
+        }
+        Member::findOrFail($id);
 
-            $sale = Sale::findOrFail($request->sale_id);
-            $member_id = $sale->member_id;
+        $member_id = DB::transaction(function () use ($request, $cash, $transfer, $totalPrice, $id) {
 
-            $updateData = [
-                'serial_number' => $request->serial_number,
-                'note' => $request->note,
-                'type_price' => $request->type_price,
-                'lock_pass' => $request->lock_pass,
-                'price' => $request->price,
-                'type_category' => $request->type_category,
-                'subcategories' => $request->subcategories,
-                'idcard_images' => $request->required,
-            ];
+            $sale = new Sale();
+            $sale->brand = strtolower($request->brand);
 
-            if ($request->filled('type_serve')) {
-                $updateData['type_serve'] = $request->type_serve;
+            $sale->member_id = $id;
+            $sale->other_brand = $request->other_brand;
+            $sale->other_type = $request->other_type;
+            $sale->brand = $request->brand;
+            $sale->model = $request->model;
+            $sale->locker_pass = $request->locker_pass;
+            $sale->drawn_lock = $request->drawn_lock;
+            $sale->serial_number = $request->serial_number;
+
+            $sale->cash = $cash;
+            $sale->transfer = $transfer;
+
+            $sale->note = $request->note;
+            $sale->appointment_date = $request->appointment_date;
+
+            // upload รูป
+            if ($request->hasFile('product_images')) {
+
+                $paths = [];
+
+                foreach ($request->file('product_images') as $image) {
+                    $paths[] = $image->store('products', 'public');
+                }
+
+                $sale->product_images = json_encode($paths);
             }
 
-            $sale->update($updateData);
+            if ($request->hasFile('bill')) {
+                $sale->bill = $request->file('bill')->store('bills', 'public');
+            }
+
+            $sale->save();
+
+            $Expenses = new Expenses();
+            $Expenses->product = "ขายสินค้า {$sale->brand} {$sale->model}";
+            $Expenses->cash = $cash;
+            $Expenses->transfer = $transfer;
+            $Expenses->type = 'receive';
+            $Expenses->user_id = auth()->id();
+            $Expenses->save();
+
+            return $sale->member_id; // ✅ อันนี้จะถูกส่งออกไป
         });
 
+
         return redirect()->route('commerce.create_search', [
-            'member_id' => $member_id
+            'member_id' => $member_id,
+            'success' => 'บันทึกข้อมูลเรียบร้อย'
         ]);
     }
+
 
     public function report_member($id)
     {
@@ -181,26 +251,26 @@ class CommerceController extends Controller
         return view('commerce::commerce.report_member', compact('member'));
     }
 
-    public function search_member(Request $request)
+    public function scopeSearch($query, $keyword)
     {
-        $keyword = trim($request->keyword);
+        if (!$keyword) return $query;
 
-        $query = Member::query();
+        return $query->where(function ($q) use ($keyword) {
 
-        if ($keyword) {
-            $query->whereHas('sales_r', function ($q) use ($keyword) {
-                $q->where('brand', 'like', "%{$keyword}%")
+            // member fields
+            $q->where('name', 'like', "%{$keyword}%")
+                ->orWhere('phone', 'like', "%{$keyword}%")
+                ->orWhere('email', 'like', "%{$keyword}%")
+                ->orWhere('tax_number', 'like', "%{$keyword}%");
+
+            // sales fields
+            $q->orWhereHas('sales_r', function ($sale) use ($keyword) {
+                $sale->where('brand', 'like', "%{$keyword}%")
                     ->orWhere('model', 'like', "%{$keyword}%")
-                    ->orWhere('serial_number', 'like', "%{$keyword}%");
+                    ->orWhere('serial_number', 'like', "%{$keyword}%")
+                    ->orWhere('note', 'like', "%{$keyword}%");
             });
-        }
-
-        $member = $query
-            ->with('sales_r')
-            ->orderBy('member_id', 'desc')
-            ->paginate(20);
-
-        return view('commerce::commerce.customer', compact('member'));
+        });
     }
 
 
@@ -211,7 +281,7 @@ class CommerceController extends Controller
         return view('commerce::index');
     }
 
-    public function report_pawning($id)
+    public function report_pawning($id = null)
     {
         $sale = Sale::where('id', $id)->first();
         $member_id = $sale->member_id;
@@ -254,5 +324,215 @@ class CommerceController extends Controller
         $sale->delete();
         return redirect()->route('commerce.create_pawning')
             ->with('success', 'ยกเลิกรายการขายเรียบร้อย');
+    }
+
+    public function dok($id = null)
+    {
+        return view('commerce::commerce.dok', compact('id'));
+    }
+
+    public function store_dok(Request $request)
+    {
+        $request->validate([
+            'interest' => 'required|numeric|min:0',
+            'transfer' => 'nullable|numeric|min:0',
+            'cash' => 'nullable|numeric|min:0',
+            'slip' => 'nullable|image|max:2048',
+        ]);
+
+        $slipPath = null;
+
+        if ($request->hasFile('slip')) {
+            $slipPath = $request->file('slip')
+                ->store('slips', 'public');
+        }
+
+        Dok::create([
+            'principal' => $request->principal,
+            'interest' => $request->interest,
+            'total' => $request->principal + $request->interest,
+            'cash' => $request->cash ?? 0,
+            'transfer' => $request->transfer ?? 0,
+            'slip' => $slipPath,
+            'user_id' => auth()->id(),
+        ]);
+
+        return back()->with('success', 'บันทึกการต่อดอกเรียบร้อย');
+    }
+
+    public function tai()
+    {
+        return view('commerce::commerce.tai');
+    }
+
+    public function tai_store(Request $request)
+    {
+        $request->validate([
+            'principal' => 'required|numeric|min:0',
+            'interest' => 'required|numeric|min:0',
+            'total' => 'required|numeric|min:0',
+            'cash' => 'nullable|numeric|min:0',
+            'transfer' => 'nullable|numeric|min:0',
+            'slip' => 'nullable|image|max:2048',
+        ]);
+
+        $slipPath = null;
+
+        if ($request->hasFile('slip')) {
+            $slipPath = $request->file('slip')
+                ->store('slips', 'public');
+        }
+
+        $tai = new Tai();
+        $tai->principal = $request->principal;
+        $tai->interest = $request->interest;
+        $tai->total = $request->total;
+        $tai->cash = $request->cash ?? 0;
+        $tai->transfer = $request->transfer ?? 0;
+        $tai->slip = $slipPath;
+        $tai->user_id = auth()->id();
+        $tai->save();
+
+        return back()->with('success', 'บันทึกการไถ่ถอนเรียบร้อย');
+    }
+
+    public function pueam()
+    {
+        return view('commerce::commerce.pueam');
+    }
+
+    public function store_pueam(Request $request)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:0',
+            'cash' => 'nullable|numeric|min:0',
+            'transfer' => 'nullable|numeric|min:0',
+            'slip' => 'nullable|image|max:2048',
+        ]);
+
+        $slipPath = null;
+
+        if ($request->hasFile('slip')) {
+            $slipPath = $request->file('slip')
+                ->store('slips', 'public');
+        }
+
+        Pueam::create([
+            'amount' => $request->amount,
+            'cash' => $request->cash ?? 0,
+            'transfer' => $request->transfer ?? 0,
+            'slip' => $slipPath,
+            'user_id' => auth()->id(),
+        ]);
+
+        return back()->with('success', 'บันทึกการปื้เอมเรียบร้อย');
+    }
+
+    public function create_sellfront($id = null)
+    {
+        return view('commerce::commerce.create_sellfront', compact('id'));
+    }
+
+    public function store_sellfront(Request $request)
+    {
+        // dd($request->all());
+        $request->validate([
+            'product' => 'required|string|max:255',
+            'cash' => 'nullable|numeric|min:0',
+            'transfer' => 'nullable|numeric|min:0',
+            'type' => 'required|in:receive,pay',
+            'slip' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ], [
+            'type.in' => 'ประเภทต้องเป็น receive หรือ pay เท่านั้น',
+            'type.required' => 'กรุณาระบุประเภทการทำรายการ',
+        ]);
+
+        $slipPath = null;
+
+        // upload file
+        if ($request->hasFile('slip')) {
+            $slipPath = $request->file('slip')->store('slips', 'public');
+        }
+
+        $expenses = new Expenses();
+        $expenses->product = $request->product;
+        $expenses->cash = $request->cash ?? 0;
+        $expenses->transfer = $request->transfer ?? 0;
+        $expenses->type = $request->type;
+        $expenses->note = $request->note;
+        $expenses->slip = $slipPath;
+        $expenses->user_id = auth()->id();
+
+        $expenses->save();
+
+
+        return redirect()->route('commerce.report_sellfront')->with('success', 'บันทึกข้อมูลเรียบร้อย');
+    }
+
+    public function report_sellfront(Request $request)
+    {
+        $start = $request->start_date;
+        $end = $request->end_date;
+
+        // ⭐ สร้าง query กลาง
+        $query = Expenses::query()
+            ->when($start, fn($q) =>
+            $q->whereDate('created_at', '>=', $start))
+            ->when($end, fn($q) =>
+            $q->whereDate('created_at', '<=', $end));
+
+        // 🔥 sum จาก query จริง
+        $totalReceive = (clone $query)
+            ->where('type', 'receive')
+            ->sum(DB::raw('cash + transfer'));
+
+        $totalPay = (clone $query)
+            ->where('type', 'pay')
+            ->sum(DB::raw('cash + transfer'));
+
+        $balance = $totalReceive - $totalPay;
+
+        // ⭐ paginate แยก
+        $expenses = (clone $query)
+            ->with('user')
+            ->latest()
+            ->paginate(20)
+            ->withQueryString();
+
+        return view('commerce::commerce.report_sellfont', compact(
+            'expenses',
+            'totalReceive',
+            'totalPay',
+            'balance',
+            'start',
+            'end'
+        ));
+    }
+
+    public function sale_list()
+    {
+        $sales = Sale::get();
+        dd($sales);
+        return view('commerce::commerce.sale_list', compact('sales'));
+    }
+
+    public function show_sale($id)
+    {
+        // // dd($id);
+        // $sale = Sale::findOrFail($id);
+        // if ($sale->type_serve === 'pawn') {
+        //     $member = Member::where('member_id', $sale->member_id)->first();
+        //     // dd($member);
+        //     return redirect()->route('commerce.report_pawning', compact('sale', 'member'));
+        // } elseif ($sale->type_serve === 'tai') {
+        //     return redirect()->route('commerce.tai', $sale->id);
+        // } elseif ($sale->type_serve === 'pueam') {
+        //     return redirect()->route('commerce.pueam', $sale->id);
+        // } elseif ($sale->type_serve === 'dok') {
+        //     return redirect()->route('commerce.dok', $sale->id);
+        // }
+
+        $sale = Sale::findOrFail($id);
+        return redirect()->route('commerce.create_pawning', $sale->id);
     }
 }

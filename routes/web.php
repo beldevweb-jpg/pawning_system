@@ -11,7 +11,7 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     return redirect()->route('commerce.create_search');
-})->middleware(['auth', 'verified'])->name('dashboard');;
+})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     route::get('/user', [UserController::class, 'index'])->name('user.index');

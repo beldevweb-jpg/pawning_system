@@ -1,117 +1,157 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ทำรายการ</title>
-<link rel="stylesheet" href="tai.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ทำรายการ</title>
+    <link rel="stylesheet" href="{{ asset('css/tai.css') }}">
 </head>
+
 <body>
+    <header style="display:flex;justify-content:space-between;padding:15px;">
+        <div>
+            👤 {{ auth()->user()->name ?? '' }}
+        </div>
 
-<div class="header">
-  <div>username</div>
-  <div class="logout">log out</div>
-</div>
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button style="background:red;color:white;border:none;padding:8px 12px;border-radius:6px">
+                ออกจากระบบ
+            </button>
+        </form>
+    </header>
 
-<div class="container">
+    <div class="container">
+        @if (session('success'))
+            <div class="msg ok">
+                {{ session('success') }}
+            </div>
+        @endif
 
-  <div class="card">
+        @if ($errors->any())
+            <div class="msg err">
+                @foreach ($errors->all() as $error)
+                    <div>- {{ $error }}</div>
+                @endforeach
+            </div>
+        @endif
+        <form method="POST" action="{{ route('commerce.tai.store') }}" enctype="multipart/form-data">
+            @csrf
 
-    <!-- menu tabs -->
-    <div class="menu-tabs">
-      <button class="tab">จัดการข้อมูลหน้าร้าน</button>
-      <button class="tab">จัดการข้อมูลลูกค้า</button>
-      <button class="tab">จัดการขาย</button>
+            <div class="card">
+
+                <h2 class="center-title">ไถ่</h2>
+
+                <!-- รูป -->
+                <div class="image-grid">
+                    <div class="image-box">+</div>
+                    <div class="image-box">+</div>
+                    <div class="image-box">+</div>
+                </div>
+
+                <!-- เงิน -->
+                <div class="grid-2">
+
+                    <!-- เงินต้น -->
+                    <div class="two-column">
+                        <div>
+                            <label>เงินต้น</label>
+                            <input class="input" value="(แก้ไม่ได้)" disabled>
+                        </div>
+                        <div>
+                            <label>ดอก</label>
+                            <div class="plus-line">
+                                <span>+</span>
+                                <input id="interestInput" name="dok" class="input" type="number" disabled>
+                            </div>
+                            <small class="edit-link" onclick="toggleEdit()">
+                                แก้ไข
+                            </small>
+                        </div>
+                    </div>
+
+                    <div id="noteSection" class="form-group" style="display:none;">
+                        <label>หมายเหตุ</label>
+
+                        <textarea name="note" class="textarea" placeholder="ระบุเหตุผลที่แก้ไข"></textarea>
+                    </div>
+                </div>
+                <!-- รวม -->
+                <div class="form-group">
+                    <label>รวมต้องจ่าย</label>
+
+                    <input id="totalInput" name="total" class="input total" readonly>
+                </div>
+
+
+
+                <!-- การชำระ -->
+                <h3 class="section-title">การชำระเงิน</h3>
+
+                <div class="grid-2">
+
+                    <div class="form-group">
+                        <label>เงินโอน</label>
+                        <input name="transfer" id="transferInput" class="input" type="number">
+                    </div>
+
+                    <div class="form-group">
+                        <label>เงินสด</label>
+                        <input name="cash" id="cashInput" class="input" type="number">
+                    </div>
+
+                </div>
+
+                <div class="form-group">
+                    <label>แนบสลิป</label>
+
+                    <input type="file" name="slip" class="file-input" accept="image/*">
+                </div>
+
+                <!-- ปุ่ม -->
+                <div class="submit">
+
+                    <button type="button" class="danger">
+                        ยกเลิก
+                    </button>
+
+                    <button class="primary">
+                        💾 บันทึก
+                    </button>
+                </div>
+            </div>
+        </form>
     </div>
 
-    <!-- title -->
-    <h2 class="center-title">ไถ่</h2>
+    <script>
+        function toggleEdit() {
 
-    <!-- รูป 3 ช่อง -->
-    <div class="image-grid">
-      <div class="image-box">รูป</div>
-      <div class="image-box">รูป</div>
-      <div class="image-box">รูป</div>
-    </div>
+            const input =
+                document.getElementById("interestInput");
 
-    <!-- เงินต้น -->
-    <div class="two-column">
-      <div>
-        <label>เงินต้น</label>
-        <input class="input" value="(แก้ไม่ได้)" disabled>
-      </div>
+            const note =
+                document.getElementById("noteSection");
 
-      <div>
-  <label>ดอก</label>
-  <div class="plus-line">
-    <span>+</span>
-    <input id="interestInput" 
-           class="input small" 
-           placeholder="(กดแก้ไขจำนวนเงินก่อนแก้ไข)"
-           disabled>
-  </div>
-  <small class="edit-link" onclick="toggleEdit()">แก้ไข</small>
+            const isDisabled =
+                input.disabled;
 
-</div>
+            input.disabled = !isDisabled;
 
-    </div>
+            if (!input.disabled) {
 
-    <!-- รวม -->
-    <div class="form-row column">
-      <label>รวม</label>
-      <input class="input" disabled>
-    </div>
+                input.focus();
+                note.style.display = "flex";
 
-    <!-- หมายเหตุ -->
-<div id="noteSection" class="form-row column" style="display:none;">
-  <label>หมายเหตุ</label>
-  <textarea class="textarea" placeholder="(แสดงหลังตัดแก้ไข)"></textarea>
-</div>
+            } else {
+
+                note.style.display = "none";
+            }
+        }
+    </script>
 
 
-    <!-- การชำระเงิน -->
-    <h3 class="section-title">การชำระเงิน</h3>
-
-    <div class="payment-row">
-      <label>เงินโอน</label>
-      <input class="input small">
-
-      <label>เงินสด</label>
-      <input class="input small">
-    </div>
-
-   <div class="form-row column">
-  <label>สลิป</label>
-  <input type="file" class="file-input" accept="image/*">
-</div>
-
-  </div>
-
-  <!-- ปุ่ม -->
-  <div class="submit">
-    <button class="danger">ยกเลิก</button>
-    <button class="primary">บันทึก</button>
-  </div>
-
-</div>
-<script>
-function toggleEdit() {
-  const input = document.getElementById("interestInput");
-  const note = document.getElementById("noteSection");
-
-  // สลับสถานะ disabled
-  input.disabled = !input.disabled;
-
-  if (!input.disabled) {
-    input.focus();
-    note.style.display = "flex";   // แสดงหมายเหตุ
-  } else {
-    note.style.display = "none";   // ซ่อนหมายเหตุ
-  }
-}
-</script>
-
-</script>
 
 </body>
+
 </html>

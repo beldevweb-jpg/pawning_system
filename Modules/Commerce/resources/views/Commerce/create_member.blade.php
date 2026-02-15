@@ -11,15 +11,14 @@
 <body>
 
     <!-- HEADER -->
-    <header class="header">
-        <div class="user">
-            <span class="avatar">👤</span>
-            <span>{{ auth()->user()->name }}</span>
+    <header style="display:flex;justify-content:space-between;padding:15px;">
+        <div>
+            👤 {{ auth()->user()->name ?? '' }}
         </div>
 
         <form method="POST" action="{{ route('logout') }}">
             @csrf
-            <button type="submit" class="logout">
+            <button style="background:red;color:white;border:none;padding:8px 12px;border-radius:6px">
                 ออกจากระบบ
             </button>
         </form>
@@ -64,23 +63,25 @@
             </div>
 
             <div class="form-row">
-                <label>รูปบัตรประชาชน</label>
-                <input type="file" name="idcard_images[]" id="idcard-image" accept="image/*" capture="environment"
-                    multiple>
+                <div class="form-row">
+                    <label>รูปบัตรประชาชน</label>
 
-                <div id="preview" style="display:flex; gap:10px; margin-top:10px;"></div>
+                    <input type="file" name="idcard_images[]" accept="image/*" capture="environment" multiple
+                        id="idcardInput">
+
+                    <div id="preview"></div>
+                </div>
+
+                <div class="action-buttons">
+                    <button type="button" class="btn cancel" id="clearForm">
+                        ยกเลิก
+                    </button>
+
+                    <button type="submit" class="btn confirm">
+                        ดำเนินการต่อ
+                    </button>
+                </div>
             </div>
-
-            <div class="action-buttons">
-                <button type="button" class="btn cancel" id="clearForm">
-                    ยกเลิก
-                </button>
-
-                <button type="submit" class="btn confirm">
-                    ดำเนินการต่อ
-                </button>
-            </div>
-        </div>
     </form>
 
     </div>
