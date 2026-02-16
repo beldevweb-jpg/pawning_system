@@ -96,9 +96,10 @@ class CommerceController extends Controller
     // ฟอร์มแสดงการจำนำ
     public function create_pawning($id)
     {
-        $member = Member::findOrFail($id);
+        $sale = Sale::find($id) ?? new Sale();
 
-        $sale = Sale::where('member_id', $id)->first() ?? new Sale();
+        // dd($sale, $id);
+        $member = Member::where('sale_id', $id)->first();
 
         return view('commerce::commerce.create_pawning', compact('sale', 'member'));
     }
@@ -206,9 +207,7 @@ class CommerceController extends Controller
 
             // upload รูป
             if ($request->hasFile('product_images')) {
-
                 $paths = [];
-
                 foreach ($request->file('product_images') as $image) {
                     $paths[] = $image->store('products', 'public');
                 }
@@ -221,6 +220,10 @@ class CommerceController extends Controller
             }
 
             $sale->save();
+
+            Member::where('id', $id)->update([
+                'sale_id' => $sale->id
+            ]);
 
             $Expenses = new Expenses();
             $Expenses->product = "ขายสินค้า {$sale->brand} {$sale->model}";
@@ -328,7 +331,12 @@ class CommerceController extends Controller
 
     public function dok($id = null)
     {
-        return view('commerce::commerce.dok', compact('id'));
+        $sale = Sale::find($id);
+        $transfer = $sale->transfer;
+        $cash = $sale->cash;
+        $totalPrice = $cash + $transfer;
+
+        return view('commerce::commerce.dok', compact('id', 'sale', 'totalPrice'));
     }
 
     public function store_dok(Request $request)
@@ -512,27 +520,14 @@ class CommerceController extends Controller
     public function sale_list()
     {
         $sales = Sale::get();
-        dd($sales);
+        // dd($sales);
         return view('commerce::commerce.sale_list', compact('sales'));
     }
 
     public function show_sale($id)
     {
-        // // dd($id);
-        // $sale = Sale::findOrFail($id);
-        // if ($sale->type_serve === 'pawn') {
-        //     $member = Member::where('member_id', $sale->member_id)->first();
-        //     // dd($member);
-        //     return redirect()->route('commerce.report_pawning', compact('sale', 'member'));
-        // } elseif ($sale->type_serve === 'tai') {
-        //     return redirect()->route('commerce.tai', $sale->id);
-        // } elseif ($sale->type_serve === 'pueam') {
-        //     return redirect()->route('commerce.pueam', $sale->id);
-        // } elseif ($sale->type_serve === 'dok') {
-        //     return redirect()->route('commerce.dok', $sale->id);
-        // }
-
         $sale = Sale::findOrFail($id);
+        // dd($sale);
         return redirect()->route('commerce.create_pawning', $sale->id);
     }
 }

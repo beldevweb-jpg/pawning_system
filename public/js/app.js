@@ -243,3 +243,17 @@ function removeImage(index) {
     input.files = dt.files;
     input.dispatchEvent(new Event('change'));
 }
+
+document.getElementById('interestInput')
+    .addEventListener('input', calculateTotalPay);
+
+function calculateTotalPay() {
+
+    const principal = parseFloat(document.getElementById('principalInput').value) || 0;
+    const interest = parseFloat(document.getElementById('interestInput').value) || 0;
+
+    const total = principal + interest;
+    window.onload = calculateTotalPay;
+    document.getElementById('totalInput').value = total.toFixed(2);
+}
+

@@ -46,9 +46,14 @@
 
                 <!-- รูป -->
                 <div class="image-grid">
-                    <div class="image-box">+</div>
-                    <div class="image-box">+</div>
-                    <div class="image-box">+</div>
+                    @if (!empty($sale->product_images))
+                        @foreach (array_slice(json_decode($sale->product_images), 0, 3) as $img)
+                            <div class ="image-box">
+                                <img src="{{ asset('storage/' . $img) }}"
+                                    style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
+                            </div>
+                        @endforeach
+                    @endif
                 </div>
 
                 <!-- เงิน -->
@@ -56,10 +61,8 @@
 
                     <div class="form-group">
                         <label>เงินต้น</label>
-
-                        <input class="input" value="{{ $principal ?? '' }}" disabled>
-
-                        <input type="hidden" name="principal" value="{{ $principal ?? '' }}">
+                        <input id="principalInput" name="principal" class="input"
+                            value="{{ $totalPrice ?? ($principal ?? '') }}" readonly>
                     </div>
 
                     <div class="form-group">
@@ -68,17 +71,18 @@
                         <div class="plus-line">
                             <span>+</span>
 
-                            <input id="interestInput" name="dok" class="input" type="number">
+                            <input id="interestInput" name="dok" class="input" type="number"
+                                oninput="calculateTotalPay()">
                         </div>
                     </div>
                 </div>
 
-                <!-- รวม -->
                 <div class="form-group">
                     <label>รวมต้องจ่าย</label>
-
-                    <input class="input total" name="total" id="totalInput" readonly>
+                    <input id="totalInput" class="input" readonly>
                 </div>
+
+
 
                 <!-- การชำระเงิน -->
                 <h3 class="section-title">การชำระเงิน</h3>

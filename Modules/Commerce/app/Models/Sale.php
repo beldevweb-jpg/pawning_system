@@ -34,4 +34,8 @@ class Sale extends Model
     {
         return $this->belongsTo(Member::class, 'member_id', 'member_id');
     }
+    
+    protected $casts = [
+        'appointment_date' => 'date',
+    ];
 }
