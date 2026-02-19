@@ -48,17 +48,17 @@ Route::group([], function () {
     Route::resource('commerces', CommerceController::class)->names('commerce');
 
     route::get('/dok/{id?}', [CommerceController::class, 'dok'])->name('commerce.dok');
-    Route::post('/dok/store', [CommerceController::class, 'store_dok'])
-        ->name('commerce.dok.store');
+    Route::post('/dok/store/{id?}', [CommerceController::class, 'dok_store'])
+        ->name('commerce.dok_store');
 
     route::get('/tai/{id?}', [CommerceController::class, 'tai'])->name('commerce.tai');
-    route::post('/tai/store', [CommerceController::class, 'store_tai'])
-        ->name('commerce.tai.store');
+    route::post('/tai/store', [CommerceController::class, 'tai_store'])
+        ->name('commerce.tai_store');
 
 
     route::get('/pueam/{id?}', [CommerceController::class, 'pueam'])->name('commerce.pueam');
     route::post('/pueam/store', [CommerceController::class, 'store_pueam'])
-        ->name('commerce.pueam.store');
+        ->name('commerce.pueam_store');
 
     route::get('/create_sellfront/{id}', [CommerceController::class, 'create_sellfront'])->name('commerce.create_sellfront');
     Route::post('/sellfront/store', [CommerceController::class, 'store_sellfront'])

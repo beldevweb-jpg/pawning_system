@@ -36,8 +36,10 @@
                 @endforeach
             </div>
         @endif
-        <form method="POST" action="{{ route('commerce.dok.store') }}" enctype="multipart/form-data">
+        <form method="POST" action="{{ route('commerce.dok_store', ['id' => $sale->id]) }}"
+            enctype="multipart/form-data">
             @csrf
+
 
             <div class="card">
                 <h2 class="center-title">ต่อดอก</h2>
@@ -68,8 +70,8 @@
                         <label>ดอก</label>
                         <div class="plus-line">
                             <span>+</span>
-                            <input id="interestInput" name="dok" class="input" type="text" inputmode="numeric"
-                                readonly>
+                            <input id="interestInput" value="{{ $dok ?? 0 }}" name="dok" class="input"
+                                type="text" inputmode="numeric" readonly>
                             <button type="button" class="edit-link" onclick="toggleEdit()">
                                 แก้ไข
                             </button>
@@ -81,11 +83,6 @@
                             <textarea class="textarea" placeholder="(แสดงหลังตัดแก้ไข)"></textarea>
                         </div>
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <label>รวมต้องจ่าย</label>
-                    <input id="totalInput" name="total_price" class="input" readonly>
                 </div>
 
                 <!-- การชำระเงิน -->
@@ -125,113 +122,55 @@
 </html>
 
 <script>
-    function toggleEdit() {
+    document.addEventListener("DOMContentLoaded", function() {
 
-        const input = document.getElementById("interestInput");
-        const note = document.getElementById("noteSection");
-        const btn = document.querySelector(".edit-link");
+        const interestInput = document.getElementById("interestInput");
+        const transferInput = document.getElementById("transferInput");
+        const cashInput = document.getElementById("cashInput");
+        const warning = document.getElementById("paymentWarning");
+        const confirmBtn = document.querySelector(".confirm");
 
-        // ⭐ สลับ readonly
-        input.readOnly = !input.readOnly;
-
-        if (!input.readOnly) {
-
-            input.focus();
-            note.style.display = "flex";
-            btn.textContent = "ล็อก";
-
-        } else {
-
-            note.style.display = "none";
-            btn.textContent = "แก้ไข";
-        }
-    }
-
-
-    // แปลงเลข (ลบ comma)
-    function parseNumber(val) {
-        return parseFloat(
-            (val || "0").toString().replace(/,/g, '')
-        ) || 0;
-    }
-
-    // ใส่ comma
-    function formatNumber(num) {
-        return num.toLocaleString('th-TH');
-    }
-
-    // คำนวณยอดรวม
-    function calculateTotalPay() {
-
-        const principal =
-            parseNumber(principalInput.value);
-
-        const interest =
-            parseNumber(interestInput.value);
-
-        const total = principal + interest;
-
-        totalInput.value = formatNumber(total);
-
-        checkPayment();
-    }
-
-    // เช็คยอดโอน + สด
-    function checkPayment() {
-
-        const total =
-            parseNumber(totalInput.value);
-
-        const transfer =
-            parseNumber(transferInput.value);
-
-        const cash =
-            parseNumber(cashInput.value);
-
-        const paid = transfer + cash;
-
-        if (paid === total) {
-
-            paymentWarning.style.display = "none";
-            document.querySelector(".confirm").disabled = false;
-
-        } else {
-
-            paymentWarning.style.display = "block";
-            document.querySelector(".confirm").disabled = true;
-        }
-    }
-
-    // ใส่ comma ตอนพิมพ์
-    function autoFormat(e) {
-
-        const val = parseNumber(e.target.value);
-
-        if (val === 0) {
-            e.target.value = "";
-            return;
+        function parseNumber(val) {
+            return parseFloat((val || "0").toString().replace(/,/g, '')) || 0;
         }
 
-        e.target.value = formatNumber(val);
-    }
+        function formatNumber(num) {
+            return num.toLocaleString('th-TH');
+        }
 
-    // โหลดหน้าแล้วคำนวณ
-    window.addEventListener('load', () => {
+        function checkPayment() {
 
-        calculateTotalPay();
+            const dok = parseNumber(interestInput.value);
+            const transfer = parseNumber(transferInput.value);
+            const cash = parseNumber(cashInput.value);
 
-        interestInput.addEventListener('input', calculateTotalPay);
-        transferInput.addEventListener('input', checkPayment);
-        cashInput.addEventListener('input', checkPayment);
+            const paid = transfer + cash;
 
-        interestInput.addEventListener('blur', autoFormat);
-        transferInput.addEventListener('blur', autoFormat);
-        cashInput.addEventListener('blur', autoFormat);
+            if (paid === dok) {
+                warning.style.display = "none";
+                confirmBtn.disabled = false;
+            } else {
+                warning.style.display = "block";
+                confirmBtn.disabled = true;
+            }
+        }
+
+        function autoFormat(e) {
+            const val = parseNumber(e.target.value);
+
+            if (val === 0) {
+                e.target.value = "";
+            } else {
+                e.target.value = formatNumber(val);
+            }
+
+            checkPayment();
+        }
+
+        // bind event
+        interestInput.addEventListener("input", autoFormat);
+        transferInput.addEventListener("input", autoFormat);
+        cashInput.addEventListener("input", autoFormat);
+
     });
-
-    function checkNegative(el) {
-        if (el.value < 0) {
-            el.value = 0;
-        }
-    }
 </script>

@@ -36,120 +36,203 @@
                 @endforeach
             </div>
         @endif
-        <form method="POST" action="{{ route('commerce.tai.store') }}" enctype="multipart/form-data">
+        <form method="POST" action="{{ route('commerce.tai_store', ['id' => $sale->id]) }}"
+            enctype="multipart/form-data">
             @csrf
 
             <div class="card">
-
                 <h2 class="center-title">ไถ่</h2>
-
                 <!-- รูป -->
                 <div class="image-grid">
-                    <div class="image-box">+</div>
-                    <div class="image-box">+</div>
-                    <div class="image-box">+</div>
+                    @if (!empty($sale->product_images))
+                        @foreach (array_slice(json_decode($sale->product_images), 0, 3) as $img)
+                            <div class ="image-box">
+                                <img src="{{ asset('storage/' . $img) }}"
+                                    style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
+                            </div>
+                        @endforeach
+                    @endif
                 </div>
 
                 <!-- เงิน -->
                 <div class="grid-2">
-
-                    <!-- เงินต้น -->
-                    <div class="two-column">
-                        <div>
-                            <label>เงินต้น</label>
-                            <input class="input" value="(แก้ไม่ได้)" disabled>
-                        </div>
-                        <div>
-                            <label>ดอก</label>
-                            <div class="plus-line">
-                                <span>+</span>
-                                <input id="interestInput" name="dok" class="input" type="number" disabled>
-                            </div>
-                            <small class="edit-link" onclick="toggleEdit()">
-                                แก้ไข
-                            </small>
-                        </div>
+                    <div id="paymentWarning" style="color:red; display:none; font-weight:600;">
+                        ยอดชำระไม่ตรงกับ "รวมต้องจ่าย"
                     </div>
+                    <div class="form-group">
+                        <label>เงินต้น</label>
+                        <input id="principalInput" name="principal" class="input"
+                            value="{{ number_format($totalPrice ?? ($principal ?? 0)) }}" readonly>
 
-                    <div id="noteSection" class="form-group" style="display:none;">
-                        <label>หมายเหตุ</label>
+                    </div>
+                    <div class="form-group">
+                        <label>ดอก</label>
+                        <div class="plus-line">
+                            <span>+</span>
+                            <input id="interestInput" name="dok" class="input" type="text" inputmode="numeric"
+                                readonly>
+                            <button type="button" class="edit-link" onclick="toggleEdit()">
+                                แก้ไข
+                            </button>
 
-                        <textarea name="note" class="textarea" placeholder="ระบุเหตุผลที่แก้ไข"></textarea>
+                        </div>
+                        <!-- หมายเหตุ -->
+                        <div id="noteSection" class="form-row column" style="display:none;">
+                            <label>หมายเหตุ</label>
+                            <textarea class="textarea" placeholder="(แสดงหลังตัดแก้ไข)"></textarea>
+                        </div>
                     </div>
                 </div>
-                <!-- รวม -->
+
                 <div class="form-group">
                     <label>รวมต้องจ่าย</label>
-
-                    <input id="totalInput" name="total" class="input total" readonly>
+                    <input id="totalInput" name="total_price" class="input" readonly>
                 </div>
 
-
-
-                <!-- การชำระ -->
+                <!-- การชำระเงิน -->
                 <h3 class="section-title">การชำระเงิน</h3>
-
                 <div class="grid-2">
-
                     <div class="form-group">
                         <label>เงินโอน</label>
-                        <input name="transfer" id="transferInput" class="input" type="number">
+                        <input class="input" name="transfer" id="transferInput" type="text" inputmode="numeric">
                     </div>
 
                     <div class="form-group">
                         <label>เงินสด</label>
-                        <input name="cash" id="cashInput" class="input" type="number">
+                        <input class="input" name="cash" id="cashInput" type="text" inputmode="numeric">
                     </div>
-
                 </div>
 
                 <div class="form-group">
                     <label>แนบสลิป</label>
 
-                    <input type="file" name="slip" class="file-input" accept="image/*">
+                    <input type="file" class="file-input" accept="image/*" name="slip">
                 </div>
 
-                <!-- ปุ่ม -->
                 <div class="submit">
-
-                    <button type="button" class="danger">
+                    <button type="button" class="btn cancel" id="clearForm">
                         ยกเลิก
                     </button>
 
-                    <button class="primary">
-                        💾 บันทึก
+                    <button type="submit" class="btn confirm">
+                        ดำเนินการต่อ
                     </button>
                 </div>
             </div>
         </form>
     </div>
-
-    <script>
-        function toggleEdit() {
-
-            const input =
-                document.getElementById("interestInput");
-
-            const note =
-                document.getElementById("noteSection");
-
-            const isDisabled =
-                input.disabled;
-
-            input.disabled = !isDisabled;
-
-            if (!input.disabled) {
-
-                input.focus();
-                note.style.display = "flex";
-
-            } else {
-
-                note.style.display = "none";
-            }
-        }
-    </script>
-
 </body>
 
 </html>
+
+<script>
+    function toggleEdit() {
+
+        const input = document.getElementById("interestInput");
+        const note = document.getElementById("noteSection");
+        const btn = document.querySelector(".edit-link");
+
+        // ⭐ สลับ readonly
+        input.readOnly = !input.readOnly;
+
+        if (!input.readOnly) {
+
+            input.focus();
+            note.style.display = "flex";
+            btn.textContent = "ล็อก";
+
+        } else {
+
+            note.style.display = "none";
+            btn.textContent = "แก้ไข";
+        }
+    }
+
+
+    // แปลงเลข (ลบ comma)
+    function parseNumber(val) {
+        return parseFloat(
+            (val || "0").toString().replace(/,/g, '')
+        ) || 0;
+    }
+
+    // ใส่ comma
+    function formatNumber(num) {
+        return num.toLocaleString('th-TH');
+    }
+
+    // คำนวณยอดรวม
+    function calculateTotalPay() {
+
+        const principal =
+            parseNumber(principalInput.value);
+
+        const interest =
+            parseNumber(interestInput.value);
+
+        const total = principal + interest;
+
+        totalInput.value = formatNumber(total);
+
+        checkPayment();
+    }
+
+    // เช็คยอดโอน + สด
+    function checkPayment() {
+
+        const total =
+            parseNumber(totalInput.value);
+
+        const transfer =
+            parseNumber(transferInput.value);
+
+        const cash =
+            parseNumber(cashInput.value);
+
+        const paid = transfer + cash;
+
+        if (paid === total) {
+
+            paymentWarning.style.display = "none";
+            document.querySelector(".confirm").disabled = false;
+
+        } else {
+
+            paymentWarning.style.display = "block";
+            document.querySelector(".confirm").disabled = true;
+        }
+    }
+
+    // ใส่ comma ตอนพิมพ์
+    function autoFormat(e) {
+
+        const val = parseNumber(e.target.value);
+
+        if (val === 0) {
+            e.target.value = "";
+            return;
+        }
+
+        e.target.value = formatNumber(val);
+    }
+
+    // โหลดหน้าแล้วคำนวณ
+    window.addEventListener('load', () => {
+
+        calculateTotalPay();
+
+        interestInput.addEventListener('input', calculateTotalPay);
+        transferInput.addEventListener('input', checkPayment);
+        cashInput.addEventListener('input', checkPayment);
+
+        interestInput.addEventListener('blur', autoFormat);
+        transferInput.addEventListener('blur', autoFormat);
+        cashInput.addEventListener('blur', autoFormat);
+    });
+
+    function checkNegative(el) {
+        if (el.value < 0) {
+            el.value = 0;
+        }
+    }
+</script>

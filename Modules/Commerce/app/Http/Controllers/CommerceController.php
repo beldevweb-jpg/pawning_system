@@ -333,14 +333,62 @@ class CommerceController extends Controller
     {
         $sale = Sale::findOrFail($id);
 
-        $totalPrice = ($sale->transfer ?? 0) + ($sale->cash ?? 0);
+        // dd($id);
+        $dok = $sale->dok;
 
-        return view('commerce::commerce.dok', compact('sale', 'totalPrice'));
+        $totalPrice = ($sale->transfer ?? 0) + ($sale->cash ?? 0);
+        return view('commerce::commerce.dok', compact('sale', 'totalPrice', 'dok'));
     }
 
 
 
-    public function store_dok(Request $request)
+    public function dok_store(Request $request, $id)
+    {
+        $request->validate([
+            'dok'  => 'required',
+            'slip' => 'nullable|image|max:2048',
+        ]);
+
+        $sale = Sale::findOrFail($id);
+
+        $cash     = (int) str_replace(',', '', $request->cash);
+        $transfer = (int) str_replace(',', '', $request->transfer);
+        $interest = (int) str_replace(',', '', $request->dok);
+
+        $paid = $cash + $transfer;
+
+        // ✅ เช็คให้ยอดชำระเท่ากับดอก
+        if ($paid !== $interest) {
+            return back()->withErrors('ยอดชำระไม่ตรง')->withInput();
+        }
+
+        DB::transaction(function () use ($request, $sale, $cash, $transfer) {
+
+            $slipPath = $request->hasFile('slip')
+                ? $request->file('slip')->store('slips', 'public')
+                : null;
+
+            Expenses::create([
+                'product'  => "ต่อดอกเบี้ย {$sale->brand} {$sale->model}",
+                'cash'     => $cash,
+                'transfer' => $transfer,
+                'type'     => 'pay',
+                'slip'     => $slipPath,
+            ]);
+        });
+
+        return back()->with('success', 'บันทึกการต่อดอกเรียบร้อย');
+    }
+
+
+    public function tai($id = null)
+    {
+        $sale = Sale::findOrFail($id);
+        $totalPrice = ($sale->transfer ?? 0) + ($sale->cash ?? 0);
+        return view('commerce::commerce.tai', compact('sale', 'totalPrice'));
+    }
+
+    public function tai_store(Request $request)
     {
         $request->validate([
             'sale_id' => 'required|exists:sales,id',
@@ -369,8 +417,8 @@ class CommerceController extends Controller
                 : null;
 
             $expenses = new Expenses();
-            
-            $productName = "ต่อดอกเบี้ย {$sale->brand} {$sale->model}";
+
+            $productName = "ปิด {$sale->brand} {$sale->model}";
             $expenses->product = $productName;
             $expenses->cash = $request->input('cash', 0);
             $expenses->transfer = $request->input('transfer', 0);
@@ -380,77 +428,46 @@ class CommerceController extends Controller
             $expenses->save();
         });
 
-        return back()->with('success', 'บันทึกการต่อดอกเรียบร้อย');
+        return back()->with('success', 'บันทึกการไถ่เรียบร้อย');
     }
 
-    public function tai($id = null)
+    public function pueam($id = null)
     {
-        $sale = Sale::find($id);
-        // dd($sale);
-        return view('commerce::commerce.tai', compact('sale'));
+        $sale = Sale::findOrFail($id);
+        $totalPrice = ($sale->transfer ?? 0) + ($sale->cash ?? 0);
+        return view('commerce::commerce.pueam', compact('sale', 'totalPrice'));
     }
 
-    public function tai_store(Request $request)
-    {
-        $request->validate([
-            'principal' => 'required|numeric|min:0',
-            'interest' => 'required|numeric|min:0',
-            'total' => 'required|numeric|min:0',
-            'cash' => 'nullable|numeric|min:0',
-            'transfer' => 'nullable|numeric|min:0',
-            'slip' => 'nullable|image|max:2048',
-        ]);
-
-        $slipPath = null;
-
-        if ($request->hasFile('slip')) {
-            $slipPath = $request->file('slip')
-                ->store('slips', 'public');
-        }
-
-        $tai = new Tai();
-        $tai->principal = $request->principal;
-        $tai->interest = $request->interest;
-        $tai->total = $request->total;
-        $tai->cash = $request->cash ?? 0;
-        $tai->transfer = $request->transfer ?? 0;
-        $tai->slip = $slipPath;
-        $tai->user_id = auth()->id();
-        $tai->save();
-
-        return back()->with('success', 'บันทึกการไถ่ถอนเรียบร้อย');
-    }
-
-    public function pueam()
-    {
-        return view('commerce::commerce.pueam');
-    }
-
-    public function store_pueam(Request $request)
+    public function store_pueam(Request $request, $id)
     {
         $request->validate([
-            'amount' => 'required|numeric|min:0',
-            'cash' => 'nullable|numeric|min:0',
+            'list_pueam' => 'required|string',
+            'dok' => 'required|numeric|min:0',
             'transfer' => 'nullable|numeric|min:0',
+            'cash' => 'nullable|numeric|min:0',
             'slip' => 'nullable|image|max:2048',
+            'added_by_image' => 'nullable|image|max:2048',
         ]);
+        $sale = Sale::findOrFail($request->sale_id);
 
-        $slipPath = null;
+        DB::transaction(function () use ($request, $sale) {
 
-        if ($request->hasFile('slip')) {
-            $slipPath = $request->file('slip')
-                ->store('slips', 'public');
-        }
+            $slipPath = $request->hasFile('slip')
+                ? $request->file('slip')->store('slips', 'public')
+                : null;
 
-        Pueam::create([
-            'amount' => $request->amount,
-            'cash' => $request->cash ?? 0,
-            'transfer' => $request->transfer ?? 0,
-            'slip' => $slipPath,
-            'user_id' => auth()->id(),
-        ]);
+            $expenses = new Expenses();
 
-        return back()->with('success', 'บันทึกการปื้เอมเรียบร้อย');
+            $productName = "เพิ่ม {$sale->brand} {$sale->model}";
+            $expenses->product = $productName;
+            $expenses->cash = $request->input('principal', 0);
+            $expenses->type = 'pay';
+            $expenses->slip = $slipPath;
+            $expenses->user_id = auth()->id();
+            $expenses->save();
+        });
+
+        return back()->with('success', 'บันทึกการปื้ดเรียบร้อย');
     }
 
     public function create_sellfront($id = null)
@@ -536,7 +553,7 @@ class CommerceController extends Controller
 
     public function sale_list()
     {
-        $sales = Sale::get();
+        $sales = Sale::paginate(50);
         // dd($sales);
         return view('commerce::commerce.sale_list', compact('sales'));
     }
