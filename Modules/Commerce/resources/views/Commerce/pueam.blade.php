@@ -68,27 +68,12 @@
                         <input id="principalInput" name="principal" class="input"
                             value="{{ number_format($totalPrice ?? ($principal ?? 0)) }}" readonly>
                     </div>
-                    <label>เพิ่ม</label>
-                    <div class="plus-line">
-                        <span>+</span>
-                        <input id="interestInput" name="dok" class="input" type="text" inputmode="numeric"
-                            readonly>
-                        <button type="button" class="edit-link" onclick="toggleEdit()">
-                            แก้ไข
-                        </button>
-
-                    </div>
                     <!-- หมายเหตุ -->
                     <div id="noteSection" class="form-row column" style="display:none;">
                         <label>หมายเหตุ</label>
                         <textarea class="textarea" placeholder="(แสดงหลังตัดแก้ไข)"></textarea>
                     </div>
                 </div>
-            </div>
-
-            <div class="form-group">
-                <label>รวมต้องจ่าย</label>
-                <input id="totalInput" name="total_price" class="input" readonly>
             </div>
 
             <!-- การชำระเงิน -->
@@ -115,8 +100,7 @@
 
                 <div class="form-group">
                     <label>ใครเพิ่ม/สินค้าที่เพิ่ม</label>
-
-                    <input type="file" name="added_by_image" accept="image/*" class="file-input">
+                    <input type="file" name="added_by_image[]" accept="image/*" multiple class="file-input">
                 </div>
             </div>
 
@@ -129,121 +113,9 @@
                     ดำเนินการต่อ
                 </button>
             </div>
+        </form>
     </div>
-    </form>
     </div>
 </body>
 
 </html>
-
-<script>
-    function toggleEdit() {
-
-        const input = document.getElementById("interestInput");
-        const note = document.getElementById("noteSection");
-        const btn = document.querySelector(".edit-link");
-
-        // ⭐ สลับ readonly
-        input.readOnly = !input.readOnly;
-
-        if (!input.readOnly) {
-
-            input.focus();
-            note.style.display = "flex";
-            btn.textContent = "ล็อก";
-
-        } else {
-
-            note.style.display = "none";
-            btn.textContent = "แก้ไข";
-        }
-    }
-
-
-    // แปลงเลข (ลบ comma)
-    function parseNumber(val) {
-        return parseFloat(
-            (val || "0").toString().replace(/,/g, '')
-        ) || 0;
-    }
-
-    // ใส่ comma
-    function formatNumber(num) {
-        return num.toLocaleString('th-TH');
-    }
-
-    // คำนวณยอดรวม
-    function calculateTotalPay() {
-
-        const principal =
-            parseNumber(principalInput.value);
-
-        const interest =
-            parseNumber(interestInput.value);
-
-        const total = principal + interest;
-
-        totalInput.value = formatNumber(total);
-
-        checkPayment();
-    }
-
-    // เช็คยอดโอน + สด
-    function checkPayment() {
-
-        const total =
-            parseNumber(totalInput.value);
-
-        const transfer =
-            parseNumber(transferInput.value);
-
-        const cash =
-            parseNumber(cashInput.value);
-
-        const paid = transfer + cash;
-
-        if (paid === total) {
-
-            paymentWarning.style.display = "none";
-            document.querySelector(".confirm").disabled = false;
-
-        } else {
-
-            paymentWarning.style.display = "block";
-            document.querySelector(".confirm").disabled = true;
-        }
-    }
-
-    // ใส่ comma ตอนพิมพ์
-    function autoFormat(e) {
-
-        const val = parseNumber(e.target.value);
-
-        if (val === 0) {
-            e.target.value = "";
-            return;
-        }
-
-        e.target.value = formatNumber(val);
-    }
-
-    // โหลดหน้าแล้วคำนวณ
-    window.addEventListener('load', () => {
-
-        calculateTotalPay();
-
-        interestInput.addEventListener('input', calculateTotalPay);
-        transferInput.addEventListener('input', checkPayment);
-        cashInput.addEventListener('input', checkPayment);
-
-        interestInput.addEventListener('blur', autoFormat);
-        transferInput.addEventListener('blur', autoFormat);
-        cashInput.addEventListener('blur', autoFormat);
-    });
-
-    function checkNegative(el) {
-        if (el.value < 0) {
-            el.value = 0;
-        }
-    }
-</script>

@@ -47,6 +47,8 @@
                             <th>ลูกค้า</th>
                             <th>สถานะ</th>
                             <th>จัดการ</th>
+                            <th>วางแล้วกี่วัน</th>
+                            <th>หลุดจำนำ</th>
                         </tr>
                     </thead>
 
@@ -63,6 +65,10 @@
 
                                 <td>{{ $sale->member_r->name ?? '-' }}</td>
 
+                                <td>{{ $sale->created_at ?? '-' }}</td>
+
+                                <td>{{ $sale->member_r->name ?? '-' }}</td>
+
                                 <td class="status active">
                                     {{ $sale->status ?? 'ปกติ' }}
                                 </td>
@@ -72,6 +78,9 @@
                                         Edit
                                     </a>
                                 </td>
+                                @if (auth()->user()->role_id == 1)
+                                    <td><a href="{{ route('commerce.slip', $sale->id) }}" class="btn-delete">หลุด</a></td>
+                                @endif
                             </tr>
                         @empty
                             <tr>

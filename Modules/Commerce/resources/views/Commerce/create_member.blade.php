@@ -47,6 +47,7 @@
                     @endforeach
                 </div>
             @endif
+            
             <div class="form-row">
                 <label>เลขบัตรประชาชน</label>
                 <input type="text" name="tax_number" id="idcard" placeholder="กรอกเลขบัตรประชาชน">

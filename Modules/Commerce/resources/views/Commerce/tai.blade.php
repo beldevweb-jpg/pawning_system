@@ -69,7 +69,7 @@
                         <label>ดอก</label>
                         <div class="plus-line">
                             <span>+</span>
-                            <input id="interestInput" name="dok" class="input" type="text" inputmode="numeric"
+                            <input id="interestInput" value="{{ $sale->dok }}" name="dok" class="input" type="text" inputmode="numeric"
                                 readonly>
                             <button type="button" class="edit-link" onclick="toggleEdit()">
                                 แก้ไข
@@ -132,7 +132,6 @@
         const note = document.getElementById("noteSection");
         const btn = document.querySelector(".edit-link");
 
-        // ⭐ สลับ readonly
         input.readOnly = !input.readOnly;
 
         if (!input.readOnly) {

@@ -36,10 +36,10 @@
                 @endforeach
             </div>
         @endif
+
         <form method="POST" action="{{ route('commerce.dok_store', ['id' => $sale->id]) }}"
             enctype="multipart/form-data">
             @csrf
-
 
             <div class="card">
                 <h2 class="center-title">ต่อดอก</h2>
@@ -70,7 +70,7 @@
                         <label>ดอก</label>
                         <div class="plus-line">
                             <span>+</span>
-                            <input id="interestInput" value="{{ $dok ?? 0 }}" name="dok" class="input"
+                            <input id="interestInput" value="{{ $sale->dok }}" name="dok" class="input"
                                 type="text" inputmode="numeric" readonly>
                             <button type="button" class="edit-link" onclick="toggleEdit()">
                                 แก้ไข
@@ -84,7 +84,6 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- การชำระเงิน -->
                 <h3 class="section-title">การชำระเงิน</h3>
                 <div class="grid-2">
@@ -122,55 +121,79 @@
 </html>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+    const interestInput = document.getElementById("interestInput");
+    const transferInput = document.getElementById("transferInput");
+    const cashInput = document.getElementById("cashInput");
+    const paymentWarning = document.getElementById("paymentWarning");
+    const confirmBtn = document.querySelector(".confirm");
 
-        const interestInput = document.getElementById("interestInput");
-        const transferInput = document.getElementById("transferInput");
-        const cashInput = document.getElementById("cashInput");
-        const warning = document.getElementById("paymentWarning");
-        const confirmBtn = document.querySelector(".confirm");
+    function toggleEdit() {
+        const note = document.getElementById("noteSection");
+        const btn = document.querySelector(".edit-link");
 
-        function parseNumber(val) {
-            return parseFloat((val || "0").toString().replace(/,/g, '')) || 0;
+        interestInput.readOnly = !interestInput.readOnly;
+
+        if (!interestInput.readOnly) {
+            interestInput.focus();
+            note.style.display = "flex";
+            btn.textContent = "ล็อก";
+        } else {
+            note.style.display = "none";
+            btn.textContent = "แก้ไข";
+        }
+    }
+
+    function parseNumber(val) {
+        return parseFloat((val || "0").toString().replace(/,/g, '')) || 0;
+    }
+
+    function formatNumber(num) {
+        return num.toLocaleString('th-TH');
+    }
+
+    function checkPayment() {
+        const dok = parseNumber(interestInput.value);
+        const transfer = parseNumber(transferInput.value);
+        const cash = parseNumber(cashInput.value);
+
+        const paid = transfer + cash;
+
+        if (paid === dok) {
+            paymentWarning.style.display = "none";
+            confirmBtn.disabled = false;
+        } else {
+            paymentWarning.style.display = "block";
+            confirmBtn.disabled = true;
+        }
+    }
+
+    function autoFormat(e) {
+        const val = parseNumber(e.target.value);
+
+        if (val === 0) {
+            e.target.value = "";
+            return;
         }
 
-        function formatNumber(num) {
-            return num.toLocaleString('th-TH');
-        }
+        e.target.value = formatNumber(val);
+    }
 
-        function checkPayment() {
+    window.addEventListener('DOMContentLoaded', () => {
 
-            const dok = parseNumber(interestInput.value);
-            const transfer = parseNumber(transferInput.value);
-            const cash = parseNumber(cashInput.value);
+        checkPayment();
 
-            const paid = transfer + cash;
+        transferInput.addEventListener('input', checkPayment);
+        cashInput.addEventListener('input', checkPayment);
+        interestInput.addEventListener('input', checkPayment);
 
-            if (paid === dok) {
-                warning.style.display = "none";
-                confirmBtn.disabled = false;
-            } else {
-                warning.style.display = "block";
-                confirmBtn.disabled = true;
-            }
-        }
-
-        function autoFormat(e) {
-            const val = parseNumber(e.target.value);
-
-            if (val === 0) {
-                e.target.value = "";
-            } else {
-                e.target.value = formatNumber(val);
-            }
-
-            checkPayment();
-        }
-
-        // bind event
-        interestInput.addEventListener("input", autoFormat);
-        transferInput.addEventListener("input", autoFormat);
-        cashInput.addEventListener("input", autoFormat);
-
+        transferInput.addEventListener('blur', autoFormat);
+        cashInput.addEventListener('blur', autoFormat);
+        interestInput.addEventListener('blur', autoFormat);
     });
+
+    function checkNegative(el) {
+        if (parseNumber(el.value) < 0) {
+            el.value = 0;
+        }
+    }
 </script>

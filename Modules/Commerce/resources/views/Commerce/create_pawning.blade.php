@@ -43,35 +43,38 @@
                 </div>
             @endif
             <div class="container">
-                <div class="card">
-                    <h2>ประเภท</h2>
-                    <div class="radio-group">
-                        <label class="option">
-                            <input type="radio" name="other_type" value="wand"
-                                {{ old('other_type') == 'wand' ? 'checked' : '' }}> วาง
-                        </label>
+                @if ($sale_between)
+                    <div class="card">
+                        <h2>ประเภท</h2>
+                        <div class="radio-group">
+                            <label class="option">
+                                <input type="radio" name="other_type" value="wand"
+                                    {{ old('other_type') == 'wand' ? 'checked' : '' }}> วาง
+                            </label>
 
-                        <a href="{{ route('commerce.dok', $sale->id) }}" class="btn-option">
-                            ต่อ
-                        </a>
 
-                        <a href="{{ route('commerce.tai', $sale->id) }}" class="btn-option">
-                            ไถ่
-                        </a>
+                            <a href="{{ route('commerce.dok', $sale->id) }}" class="btn-option">
+                                ต่อ
+                            </a>
 
-                        <a href="{{ route('commerce.pueam', $sale->id) }}" class="btn-option">
-                            เพิ่ม
-                        </a>
-                        <label class="option">
-                            <input type="radio" id="pawn-other" name="other_type" value="อื่นๆ"
-                                {{ old('other_type', $sale->other_type ?? '') == 'อื่นๆ' ? 'checked' : '' }}> อื่นๆ
-                        </label>
+                            <a href="{{ route('commerce.tai', $sale->id) }}" class="btn-option">
+                                ไถ่
+                            </a>
+
+                            <a href="{{ route('commerce.pueam', $sale->id) }}" class="btn-option">
+                                เพิ่ม
+                            </a>
+                            <label class="option">
+                                <input type="radio" id="pawn-other" name="other_type" value="อื่นๆ"
+                                    {{ old('other_type', $sale->other_type ?? '') == 'อื่นๆ' ? 'checked' : '' }}> อื่นๆ
+                            </label>
+                        </div>
+
+                        <input class="input" id="typesell-other-input" name="other_type_other"
+                            value="{{ old('other_type_other', $sale->other_brand ?? '') }}" placeholder="กรอกประเภท"
+                            disabled>
                     </div>
-
-                    <input class="input" id="typesell-other-input" name="other_type_other"
-                        value="{{ old('other_type_other', $sale->other_brand ?? '') }}" placeholder="กรอกประเภท"
-                        disabled>
-                </div>
+                @endif
 
                 <div class="card">
                     <h2 class="section-title">ข้อมูลลูกค้า</h2>

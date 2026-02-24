@@ -10,6 +10,14 @@ use Modules\Commerce\Models\Sale;
 use Modules\Members\Models\Member;
 use Illuminate\Support\Str;
 use Modules\Commerce\Models\Expenses;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\SvgWriter;
+use Illuminate\Support\Facades\Storage;
+use Modules\Commerce\Models\interest;
+use Carbon\Carbon;
+use Endroid\QrCode\Builder\Builder;
+
+
 
 class CommerceController extends Controller
 {
@@ -18,7 +26,8 @@ class CommerceController extends Controller
      */
     public function create_search()
     {
-        return view('commerce::commerce.create_search');
+        $sale = Sale::where('status', 'between')->first();
+        return view('commerce::commerce.create_search', compact('sale'));
     }
 
     // ค่้นหาประวัติการขาย/ลูกค้า
@@ -54,7 +63,6 @@ class CommerceController extends Controller
 
     public function create_type_of_sale($id)
     {
-        // dd($id);
         $member = Member::findOrFail($id);
         return view('commerce::commerce.create_type_of_sale', compact('member'));
     }
@@ -79,139 +87,105 @@ class CommerceController extends Controller
             $member->fullname = $request->fullname;
             $member->phone = $request->phone;
             $member->tax_number = $request->tax_number;
+            $member->save();
 
-            if ($request->hasFile('idcard_image')) {
-                $member->idcard_image = $request->file('idcard_image')
-                    ->store('idcards', 'public');
+            if ($request->hasFile('idcard_images')) {
+
+                $paths = [];
+
+                foreach ($request->file('idcard_images') as $file) {
+                    $paths[] = $file->store('idcards', 'public');
+                }
+
+                // เก็บเป็น JSON ใน database
+                $member->idcard_image = json_encode($paths);
+                $member->save();
             }
 
-            $member->save();
             return $member;
         });
 
-        return redirect()
-            ->route('commerce.create_type_of_sale', ['id' => $member->member_id]);
+        return redirect()->route(
+            'commerce.create_type_of_sale',
+            ['id' => $member->member_id]
+        )->with('success', 'บันทึกข้อมูลเรียบร้อย');
     }
 
     // ฟอร์มแสดงการจำนำ
     public function create_pawning($id)
     {
+        // dd($id);
         $sale = Sale::find($id) ?? new Sale();
 
-        // dd($sale, $id);
-        $member = Member::where('sale_id', $id)->first();
-
-        return view('commerce::commerce.create_pawning', compact('sale', 'member'));
+        $sale_between = Sale::where('status', 'between')->first();
+        // dd($sale_between);
+        if (Member::where('member_id', $id)->exists()) {
+            $member = Member::where('member_id', $id)->first();
+        } else {
+            $member = Member::where('sale_id', $id)->first();
+        }
+        // dd($sale, $member, $sale_between);
+        return view('commerce::commerce.create_pawning', compact('sale', 'member', 'sale_between'));
     }
 
-
-    // public function store_pawning(Request $request)
-    // {
-    //     $request->validate([
-    //         'sale_id' => 'required|exists:sales,id',
-    //         'subcategories' => 'required',
-    //         'type_category' => 'required',
-    //         'price' => 'required|numeric',
-    //         'type_price' => 'required|string',
-    //         'lock_pass' => 'required|string',
-    //         'serial_number' => 'required|string',
-    //         'note' => 'nullable|string',
-    //         'idcard_images' => 'required',
-    //     ]);
-
-    //     $member_id = null;
-
-    //     DB::transaction(function () use ($request, &$member_id) {
-
-    //         $sale = Sale::findOrFail($request->sale_id);
-    //         $member_id = $sale->member_id;
-
-    //         $updateData = [
-    //             'serial_number' => $request->serial_number,
-    //             'note' => $request->note,
-    //             'type_price' => $request->type_price,
-    //             'lock_pass' => $request->lock_pass,
-    //             'price' => $request->price,
-    //             'type_category' => $request->type_category,
-    //             'subcategories' => $request->subcategories,
-    //             'idcard_images' => $request->required,
-    //         ];
-
-    //         if ($request->filled('type_serve')) {
-    //             $updateData['type_serve'] = $request->type_serve;
-    //         }
-
-    //         $sale->update($updateData);
-    //     });
-
-    //     return redirect()->route('commerce.create_search', [
-    //         'member_id' => $member_id
-    //     ]);
-    // }
-
-    public function store_pawning(Request $request, $id)
+    public function store_pawning(Request $request, $id = null)
     {
-        // dd($request->all(), $id);
         $request->validate([
-            'type_category' => 'required|string',
-
-            'brand' => 'nullable|string',
-            'model' => 'nullable|string',
-
-            'locker_pass' => 'nullable|string',
-            'drawn_lock' => 'nullable|string',
-
-            'serial_number' => 'required|string',
-
-            'cash' => 'nullable|numeric|min:0',
-            'transfer' => 'nullable|numeric|min:0',
-
-            'note' => 'nullable|string',
-            'appointment_date' => 'nullable|date',
-
-            'product_images.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'bill' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-
+            'type_category'      => 'required|string',
+            'brand'              => 'nullable|string',
+            'model'              => 'nullable|string',
+            'locker_pass'        => 'nullable|string',
+            'drawn_lock'         => 'nullable|string',
+            'serial_number'      => 'required|string',
+            'cash'               => 'nullable|numeric|min:0',
+            'transfer'           => 'nullable|numeric|min:0',
+            'note'               => 'nullable|string',
+            'appointment_date'   => 'nullable|date|after_or_equal:today',
+            'product_images.*'   => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'bill'               => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         $cash = $request->cash ?? 0;
         $transfer = $request->transfer ?? 0;
-        $totalPrice = $cash + $transfer;
+        $principal = $cash + $transfer;
 
-        if ($totalPrice <= 0) {
+        if ($principal <= 0) {
             return back()
                 ->withErrors(['payment' => 'กรุณาระบุจำนวนเงิน'])
                 ->withInput();
         }
+
         Member::findOrFail($id);
 
-        $member_id = DB::transaction(function () use ($request, $cash, $transfer, $totalPrice, $id) {
+        $member_id = DB::transaction(function () use ($request, $cash, $transfer, $principal, $id) {
 
             $sale = new Sale();
-            $sale->brand = strtolower($request->brand);
 
-            $sale->member_id = $id;
-            $sale->other_brand = $request->other_brand;
-            $sale->other_type = $request->other_type;
-            $sale->brand = $request->brand;
-            $sale->model = $request->model;
-            $sale->locker_pass = $request->locker_pass;
-            $sale->drawn_lock = $request->drawn_lock;
-            $sale->serial_number = $request->serial_number;
-
-            $sale->cash = $cash;
-            $sale->transfer = $transfer;
-
-            $sale->note = $request->note;
+            // =========================
+            // กำหนดค่าพื้นฐาน
+            // =========================
+            $sale->member_id       = $id;
+            $sale->type_category   = $request->type_category;
+            $sale->brand           = $request->brand;
+            $sale->model           = $request->model;
+            $sale->other_brand     = $request->other_brand;
+            $sale->other_type      = $request->other_type;
+            $sale->locker_pass     = $request->locker_pass;
+            $sale->drawn_lock      = $request->drawn_lock;
+            $sale->serial_number   = $request->serial_number;
+            $sale->cash            = $cash;
+            $sale->transfer        = $transfer;
+            $sale->note            = $request->note;
             $sale->appointment_date = $request->appointment_date;
 
-            // upload รูป
+            // =========================
+            // Upload รูปสินค้า
+            // =========================
             if ($request->hasFile('product_images')) {
                 $paths = [];
                 foreach ($request->file('product_images') as $image) {
                     $paths[] = $image->store('products', 'public');
                 }
-
                 $sale->product_images = json_encode($paths);
             }
 
@@ -219,28 +193,89 @@ class CommerceController extends Controller
                 $sale->bill = $request->file('bill')->store('bills', 'public');
             }
 
+            // =========================
+            // คำนวณดอกเบี้ย
+            // =========================
+            $sale->dok = 0;
+
+            if ($request->appointment_date) {
+
+                $appointmentDate = Carbon::parse($request->appointment_date);
+                $today = Carbon::now();
+
+                $days = $today->diffInDays($appointmentDate);
+
+                $interestRate = Interest::where('days', '>=', $days)
+                    ->orderBy('days', 'asc')
+                    ->first();
+
+                if (!$interestRate) {
+                    $interestRate = Interest::orderBy('days', 'desc')->first();
+                }
+
+                if ($interestRate) {
+                    $percent = $interestRate->percent;
+                    $interestAmount = ($principal * $percent) / 100;
+                    $sale->dok = $interestAmount;
+                }
+            }
+
+            // =========================
+            // save ครั้งแรก (เอา id)
+            // =========================
             $sale->save();
 
-            Member::where('id', $id)->update([
+            // =========================
+            // สร้าง QR Code
+            // =========================
+            $url = route('commerce.show_sale', $sale->id);
+
+            $qrCode = QrCode::create($url)
+                ->setSize(300)
+                ->setMargin(10);
+
+            $writer = new SvgWriter();
+            $result = $writer->write($qrCode);
+
+            $qrPath = 'qrcodes/create_pawning_' . $sale->id . '.svg';
+
+
+            Storage::disk('public')->put($qrPath, $result->getString());
+
+            $sale->qr_code = $qrPath;
+            $sale->save();
+
+            // =========================
+            // อัปเดต member
+            // =========================
+            Member::where('member_id', $id)->update([
                 'sale_id' => $sale->id
             ]);
 
-            $Expenses = new Expenses();
-            $Expenses->product = "ขายสินค้า {$sale->brand} {$sale->model}";
-            $Expenses->cash = $cash;
-            $Expenses->transfer = $transfer;
-            $Expenses->type = 'receive';
-            $Expenses->user_id = auth()->id();
-            $Expenses->save();
+            // =========================
+            // บันทึกการเงิน
+            // =========================
+            $expense = new Expenses();
+            $expense->product  = "ขายสินค้า {$sale->brand} {$sale->model}";
+            $expense->cash     = $cash;
+            $expense->transfer = $transfer;
+            $expense->type     = 'receive';
+            // $expense->user_id  = auth()->id();
+            $expense->save();
 
-            return $sale->member_id; // ✅ อันนี้จะถูกส่งออกไป
+            return $sale->member_id;
         });
-
 
         return redirect()->route('commerce.create_search', [
             'member_id' => $member_id,
-            'success' => 'บันทึกข้อมูลเรียบร้อย'
+            'success'   => 'บันทึกข้อมูลเรียบร้อย'
         ]);
+    }
+
+    public function show($id)
+    {
+        $sale = Sale::with('member_r')->findOrFail($id);
+        return view('commerce::commerce.show', compact('sale'));
     }
 
 
@@ -298,14 +333,6 @@ class CommerceController extends Controller
     public function store(Request $request) {}
 
     /**
-     * Show the specified resource.
-     */
-    public function show($id)
-    {
-        return view('commerce::show');
-    }
-
-    /**
      * Show the form for editing the specified resource.
      */
     public function edit($id)
@@ -357,27 +384,29 @@ class CommerceController extends Controller
 
         $paid = $cash + $transfer;
 
-        // ✅ เช็คให้ยอดชำระเท่ากับดอก
         if ($paid !== $interest) {
             return back()->withErrors('ยอดชำระไม่ตรง')->withInput();
         }
 
-        DB::transaction(function () use ($request, $sale, $cash, $transfer) {
+        DB::transaction(function () use ($request, $sale, $cash, $transfer, $id) {
 
             $slipPath = $request->hasFile('slip')
                 ? $request->file('slip')->store('slips', 'public')
                 : null;
 
-            Expenses::create([
-                'product'  => "ต่อดอกเบี้ย {$sale->brand} {$sale->model}",
-                'cash'     => $cash,
-                'transfer' => $transfer,
-                'type'     => 'pay',
-                'slip'     => $slipPath,
-            ]);
+            $expenses = new Expenses();
+            // $expenses->user_id = auth()->id();
+            $product = "ต่อดอกเบี้ย {$sale->brand} {$sale->model}";
+            $expenses->product = $product;
+            $expenses->cash = $cash;
+            $expenses->transfer = $transfer;
+            $expenses->type = 'receive';
+            $expenses->slip = $slipPath;
+            $expenses->sale_id = $id;
+            $expenses->save();
         });
 
-        return back()->with('success', 'บันทึกการต่อดอกเรียบร้อย');
+        return redirect()->route('commerce.create_search')->with('success', 'บันทึกการต่อดอกเรียบร้อย');
     }
 
 
@@ -388,47 +417,60 @@ class CommerceController extends Controller
         return view('commerce::commerce.tai', compact('sale', 'totalPrice'));
     }
 
-    public function tai_store(Request $request)
+    public function tai_store(Request $request, $id)
     {
-        $request->validate([
-            'sale_id' => 'required|exists:sales,id',
-            'dok' => 'required|integer|min:0',
-            'transfer' => 'nullable|integer|min:0',
-            'cash' => 'nullable|integer|min:0',
-            'slip' => 'nullable|image|max:2048',
+        $request->merge([
+            'dok'      => str_replace(',', '', $request->dok),
+            'transfer' => str_replace(',', '', $request->transfer),
+            'cash'     => str_replace(',', '', $request->cash),
         ]);
 
-        $sale = Sale::findOrFail($request->sale_id);
+        if ($request->cash) {
+            $request->validate([
+                'slip' => 'required|image|max:2048',
+            ]);
+        }
+        $request->validate([
+            'dok'      => 'required|numeric|min:0',
+            'transfer' => 'nullable|numeric|min:0',
+            'cash'     => 'nullable|numeric|min:0',
+            'slip'     => 'nullable|image|max:2048',
+        ]);
 
-        $principal = $sale->total_price;
-        $interest = $request->dok;
-        $total = $principal + $interest;
+        $sale = Sale::findOrFail($id);
 
-        $paid = $request->input('cash', 0) + $request->input('transfer', 0);
+        $principal = (int) preg_replace('/[^\d]/', '', $request->total_price);
 
-        if ($paid !== $total) {
-            return back()->withErrors('ยอดชำระไม่ตรง');
+        $cash     = (float) $request->input('cash', 0);
+        $transfer = (float) $request->input('transfer', 0);
+        $paid     = $cash + $transfer;
+
+        if ($paid !=  $principal) {
+            return back()->withErrors(['payment' => 'ยอดชำระไม่ตรง'])->withInput();
         }
 
-        DB::transaction(function () use ($request, $sale, $principal, $interest, $total, $paid) {
+        DB::transaction(function () use ($request, $sale, $cash, $transfer) {
 
             $slipPath = $request->hasFile('slip')
                 ? $request->file('slip')->store('slips', 'public')
                 : null;
 
+
             $expenses = new Expenses();
 
-            $productName = "ปิด {$sale->brand} {$sale->model}";
-            $expenses->product = $productName;
-            $expenses->cash = $request->input('cash', 0);
-            $expenses->transfer = $request->input('transfer', 0);
-            $expenses->type = 'receive';
-            $expenses->slip = $slipPath;
-            $expenses->user_id = auth()->id();
+            $expenses->product  = "ปิด {$sale->brand} {$sale->model}";
+            $expenses->cash     = $cash;
+            $expenses->transfer = $transfer;
+            $expenses->type     = 'receive';
+            $expenses->slip     = $slipPath;
+            $expenses->user_id  = auth()->id();
             $expenses->save();
+
+            $sale->status = 'closed';
+            $sale->save();
         });
 
-        return back()->with('success', 'บันทึกการไถ่เรียบร้อย');
+        return redirect()->route('commerce.create_search')->with('success', 'บันทึกการต่อดอกเรียบร้อย');
     }
 
     public function pueam($id = null)
@@ -440,34 +482,57 @@ class CommerceController extends Controller
 
     public function store_pueam(Request $request, $id)
     {
-        $request->validate([
-            'list_pueam' => 'required|string',
-            'dok' => 'required|numeric|min:0',
-            'transfer' => 'nullable|numeric|min:0',
-            'cash' => 'nullable|numeric|min:0',
-            'slip' => 'nullable|image|max:2048',
-            'added_by_image' => 'nullable|image|max:2048',
+        $request->merge([
+            'transfer' => str_replace(',', '', $request->transfer),
+            'cash'     => str_replace(',', '', $request->cash),
         ]);
-        $sale = Sale::findOrFail($request->sale_id);
 
-        DB::transaction(function () use ($request, $sale) {
+        $request->validate([
+            'list_pueam'       => 'required|string',
+            'transfer'         => 'nullable|numeric|min:0',
+            'cash'             => 'nullable|numeric|min:0',
+            'slip'             => 'nullable|image|max:2048',
+            'added_by_image'   => 'nullable|array',
+            'added_by_image.*' => 'image|max:2048',
+        ]);
+
+        $originalSale = Sale::findOrFail($id);
+
+        $cash     = (float) $request->cash;
+        $transfer = (float) $request->transfer;
+
+        DB::transaction(function () use ($request, $originalSale, $cash, $transfer, $id) {
 
             $slipPath = $request->hasFile('slip')
                 ? $request->file('slip')->store('slips', 'public')
                 : null;
 
-            $expenses = new Expenses();
+            $paths = [];
 
-            $productName = "เพิ่ม {$sale->brand} {$sale->model}";
-            $expenses->product = $productName;
-            $expenses->cash = $request->input('principal', 0);
-            $expenses->type = 'pay';
-            $expenses->slip = $slipPath;
-            $expenses->user_id = auth()->id();
+            if ($request->hasFile('added_by_image')) {
+                foreach ($request->file('added_by_image') as $image) {
+                    $paths[] = $image->store('products', 'public');
+                }
+            }
+
+            $expenses = new Expenses();
+            $expenses->product  = "เพิ่มรายการจาก {$request->list_pueam}";
+            $expenses->cash     = $cash;
+            $expenses->transfer = $transfer;
+            $expenses->type     = 'receive';
+            $expenses->slip     = $slipPath;
+            $expenses->product_images = count($paths) ? json_encode($paths) : null;
+            // $expenses->user_id  = auth()->id();
+            $expenses->sale_id = $id;
             $expenses->save();
+
+            $sale = Sale::findOrFail($id);
+            $sale->cash += $cash;
+            $sale->transfer += $transfer;
+            $sale->save();
         });
 
-        return back()->with('success', 'บันทึกการปื้ดเรียบร้อย');
+        return redirect()->route('commerce.create_search')->with('success', 'บันทึกการต่อดอกเรียบร้อย');
     }
 
     public function create_sellfront($id = null)
@@ -477,7 +542,6 @@ class CommerceController extends Controller
 
     public function store_sellfront(Request $request)
     {
-        // dd($request->all());
         $request->validate([
             'product' => 'required|string|max:255',
             'cash' => 'nullable|numeric|min:0',
@@ -491,7 +555,6 @@ class CommerceController extends Controller
 
         $slipPath = null;
 
-        // upload file
         if ($request->hasFile('slip')) {
             $slipPath = $request->file('slip')->store('slips', 'public');
         }
@@ -507,7 +570,6 @@ class CommerceController extends Controller
 
         $expenses->save();
 
-
         return redirect()->route('commerce.report_sellfront')->with('success', 'บันทึกข้อมูลเรียบร้อย');
     }
 
@@ -516,14 +578,12 @@ class CommerceController extends Controller
         $start = $request->start_date;
         $end = $request->end_date;
 
-        // ⭐ สร้าง query กลาง
         $query = Expenses::query()
             ->when($start, fn($q) =>
             $q->whereDate('created_at', '>=', $start))
             ->when($end, fn($q) =>
             $q->whereDate('created_at', '<=', $end));
 
-        // 🔥 sum จาก query จริง
         $totalReceive = (clone $query)
             ->where('type', 'receive')
             ->sum(DB::raw('cash + transfer'));
@@ -534,7 +594,6 @@ class CommerceController extends Controller
 
         $balance = $totalReceive - $totalPay;
 
-        // ⭐ paginate แยก
         $expenses = (clone $query)
             ->with('user')
             ->latest()
@@ -563,5 +622,14 @@ class CommerceController extends Controller
         $sale = Sale::findOrFail($id);
         // dd($sale);
         return redirect()->route('commerce.create_pawning', $sale->id);
+    }
+
+    public function slip($id)
+    {
+        $sale = Sale::findOrFail($id);
+        $sale->status = 'fall';
+        $sale->save();
+
+        return back()->with('success', 'หลุดจำนำเรียบร้อย');
     }
 }
