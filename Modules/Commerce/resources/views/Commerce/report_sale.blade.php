@@ -72,8 +72,13 @@
 
         <!-- table -->
         <table width="100%" cellpadding="12" style="background:white;border-radius:12px">
+            <a href="{{ route('commerce.report_sale_pdf', request()->query()) }}" target="_blank"
+                style="background:black;color:white;padding:8px 12px;border-radius:6px;text-decoration:none">
+                Export PDF
+            </a>
             <thead style="background:#2f3640;color:white">
                 <tr>
+
                     <th>รายการ</th>
                     <th>เงินสด</th>
                     <th>โอน</th>

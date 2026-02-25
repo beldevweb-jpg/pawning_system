@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Storage;
 use Modules\Commerce\Models\interest;
 use Carbon\Carbon;
 use Endroid\QrCode\Builder\Builder;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 
 
@@ -270,12 +271,24 @@ class CommerceController extends Controller
             'member_id' => $member_id,
             'success'   => 'บันทึกข้อมูลเรียบร้อย'
         ]);
+
+        // if (auth()->user()->roles->id == 2) {
+        //     return redirect()->route('commerce.create_search', [
+        //         'member_id' => $member_id,
+        //         'success'   => 'บันทึกข้อมูลเรียบร้อย'
+        //     ]);
+        // } elseif (auth()->user()->roles->id == 1) {
+        //     return redirect()->route('commerce.create_search', [
+        //         'member_id' => $member_id,
+        //         'success'   => 'บันทึกข้อมูลเรียบร้อย'
+        //     ]);
+        // }
     }
 
     public function show($id)
     {
         $sale = Sale::with('member_r')->findOrFail($id);
-        return view('commerce::commerce.show', compact('sale'));
+        return view('commerce::commerce.create_pawning', compact('sale'));
     }
 
 
@@ -586,11 +599,11 @@ class CommerceController extends Controller
 
         $totalReceive = (clone $query)
             ->where('type', 'receive')
-            ->sum(DB::raw('cash + transfer'));
+            ->sum(DB::raw('COALESCE(cash,0) + COALESCE(transfer,0)'));
 
         $totalPay = (clone $query)
             ->where('type', 'pay')
-            ->sum(DB::raw('cash + transfer'));
+            ->sum(DB::raw('COALESCE(cash,0) + COALESCE(transfer,0)'));
 
         $balance = $totalReceive - $totalPay;
 
@@ -600,7 +613,7 @@ class CommerceController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        return view('commerce::commerce.report_sellfont', compact(
+        return view('commerce::commerce.report_sale', compact(
             'expenses',
             'totalReceive',
             'totalPay',
@@ -608,6 +621,62 @@ class CommerceController extends Controller
             'start',
             'end'
         ));
+    }
+
+    // PDFFFFF
+    public function reportSellfrontPdf(Request $request)
+    {
+        $start = $request->start_date;
+        $end = $request->end_date;
+
+        $query = Expenses::query()
+            ->when($start, fn($q) =>
+            $q->whereDate('created_at', '>=', $start))
+            ->when($end, fn($q) =>
+            $q->whereDate('created_at', '<=', $end));
+
+        $totals = (clone $query)
+            ->selectRaw("
+            SUM(CASE WHEN type = 'receive'
+                THEN COALESCE(cash,0) + COALESCE(transfer,0)
+                ELSE 0 END) as total_receive,
+            SUM(CASE WHEN type = 'pay'
+                THEN COALESCE(cash,0) + COALESCE(transfer,0)
+                ELSE 0 END) as total_pay
+        ")
+            ->first();
+
+        $totalReceive = $totals->total_receive ?? 0;
+        $totalPay = $totals->total_pay ?? 0;
+        $balance = $totalReceive - $totalPay;
+
+        $expenses = (clone $query)
+            ->with('user')
+            ->latest()
+            ->get();
+
+        $pdf = Pdf::loadView('commerce::commerce.report_sale_pdf', compact(
+            'expenses',
+            'totalReceive',
+            'totalPay',
+            'balance',
+            'start',
+            'end'
+        ))->setPaper('a4', 'portrait');
+
+        return $pdf->stream('report_sale_pdf.pdf');
+    }
+
+
+
+    public function reportSalePdf()
+    {
+        $member = Member::with('sales_r')->get();
+
+        $pdf = Pdf::loadView('commerce::commerce.report_sale_pdf', compact('member'))
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->stream('report_sale.pdf');
     }
 
     public function sale_list()

@@ -28,7 +28,7 @@
             <h2>สมัครผู้ใช้งาน</h2>
 
             <!-- FORM -->
-            <form method="POST" action="{{ route('register') }}" class="register-form">
+            <form method="POST" action="{{ route('register.store') }}" class="register-form">
                 @csrf
                 <div class="form-group">
                     <label>ชื่อนามสกุล</label>
@@ -37,7 +37,7 @@
 
                 <div class="form-group">
                     <label>เบอร์โทรศัพท์</label>
-                    <input type="phone" name="phone" placeholder="เบอร์โทรศัพท์">
+                    <input type="tel" name="phone" placeholder="เบอร์โทรศัพท์">
                 </div>
 
                 <div class="form-group">
@@ -61,8 +61,8 @@
                     <select name="role_id" required>
                         <option value="">-- เลือกบทบาท --</option>
                         <option value="1">Admin</option>
-                        <option value="2">Staff</option>
-                        <option value="3">User</option>
+                        <option value="2">employee</option>
+                        <option value="3">manager</option>
                     </select>
                 </div>
 

@@ -38,7 +38,6 @@ class RegisteredUserController extends Controller
             'status' => ['required'],
         ]);
 
-
         $user = User::create([
             'name' => $request->name,
             'username' => $request->username,
