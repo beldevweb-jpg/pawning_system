@@ -131,8 +131,11 @@ class CommerceController extends Controller
 
     public function store_pawning(Request $request, $id = null)
     {
+        // dd($request);
         $request->validate([
             'type_category'      => 'required|string',
+            'action_type'        => 'required_if:sale_between,1',
+            'action_type_other'  => 'required_if:action_type,other|string',
             'brand'              => 'nullable|string',
             'model'              => 'nullable|string',
             'locker_pass'        => 'nullable|string',
@@ -144,6 +147,9 @@ class CommerceController extends Controller
             'appointment_date'   => 'nullable|date|after_or_equal:today',
             'product_images.*'   => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'bill'               => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ], [
+            'action_type.required' => 'กรุณาเลือกประเภท',
+            'action_type_other.required_if' => 'กรุณากรอกประเภทอื่นๆ',
         ]);
 
         $cash = $request->cash ?? 0;
@@ -171,6 +177,7 @@ class CommerceController extends Controller
             $sale->model           = $request->model;
             $sale->other_brand     = $request->other_brand;
             $sale->other_type      = $request->other_type;
+            $sale->other           = $request->other;
             $sale->locker_pass     = $request->locker_pass;
             $sale->drawn_lock      = $request->drawn_lock;
             $sale->serial_number   = $request->serial_number;
@@ -260,7 +267,13 @@ class CommerceController extends Controller
             $expense->product  = "ขายสินค้า {$sale->brand} {$sale->model}";
             $expense->cash     = $cash;
             $expense->transfer = $transfer;
-            $expense->type     = 'receive';
+
+            if ($request->pay) {
+                $expense->type     = 'pay';
+            } else {
+                $expense->type     = 'receive';
+            }
+
             // $expense->user_id  = auth()->id();
             $expense->save();
 
@@ -548,6 +561,12 @@ class CommerceController extends Controller
         return redirect()->route('commerce.create_search')->with('success', 'บันทึกการต่อดอกเรียบร้อย');
     }
 
+    public function show_member()
+    {
+        $member = member::paginate(20);
+        return view('commerce::commerce.show_member', compact('member'));
+    }
+
     public function create_sellfront($id = null)
     {
         return view('commerce::commerce.create_sellfront', compact('id'));
@@ -667,6 +686,12 @@ class CommerceController extends Controller
         return $pdf->stream('report_sale_pdf.pdf');
     }
 
+    public function detil_sale($id)
+    {
+        $sale = Sale::with('member_r')->findOrFail($id);
+        return view('commerce::commerce.detil_sale', compact('sale'));
+    }
+
 
 
     public function reportSalePdf()
@@ -681,7 +706,7 @@ class CommerceController extends Controller
 
     public function sale_list()
     {
-        $sales = Sale::paginate(50);
+        $sales = Sale::paginate(20);
         // dd($sales);
         return view('commerce::commerce.sale_list', compact('sales'));
     }
@@ -696,9 +721,35 @@ class CommerceController extends Controller
     public function slip($id)
     {
         $sale = Sale::findOrFail($id);
+
         $sale->status = 'fall';
         $sale->save();
 
+        $member = $sale->member_r;
+
+        if ($member) {
+            $member->status = 'foreclosed';
+            $member->save();
+        }
+
         return back()->with('success', 'หลุดจำนำเรียบร้อย');
+    }
+
+    public function edit_status_member($id)
+    {
+        $member = Member::findOrFail($id);
+
+        return view('commerce::commerce.edit_status_member', compact('member'));
+    }
+
+    public function stor_edit_status_member(Request $request, $id)
+    {
+        $member = Member::findOrFail($id);
+
+        $member->status = $request->status;
+        $member->save();
+
+        return redirect()->route('commerce.show_member')
+            ->with('success', 'ปรับสถานะลูกค้าแล้ว');
     }
 }

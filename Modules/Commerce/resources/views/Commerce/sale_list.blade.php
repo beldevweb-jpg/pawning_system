@@ -21,7 +21,28 @@
             </button>
         </form>
     </header>
-    <div class="container">
+    <div class="container" style="max-width:1500px;margin:auto">
+        @if (auth()->user()->role_id == 3)
+            <nav>
+                <a href="{{ route('commerce.report_sellfront') }}">
+                    {{ request()->routeIs('commerce.report_sellfront') ? '► ' : '' }}รายการรับจ่าย
+                </a> |
+
+                <a href="{{ route('commerce.sale_list') }}">
+                    {{ request()->routeIs('commerce.sale_list') ? '► ' : '' }}รายการจำนำ
+                </a> |
+
+                <a href="{{ route('user.index') }}">
+                    {{ request()->routeIs('user.*') ? '► ' : '' }}จัดการพนักงาน
+                </a> |
+
+                <a href="{{ route('commerce.show_member') }}">
+                    {{ request()->routeIs('commerce.show_member') ? '► ' : '' }}รายชื่อลูกค้า
+                </a>
+            </nav>
+            <hr>
+        @endif
+
         <div class="card">
 
             <div class="page-header">
@@ -36,59 +57,90 @@
             </div>
 
             <!-- TABLE -->
+            @php
+                $showFallColumn = $sales->where('status', '!=', 'fall')->count() > 0;
+            @endphp
+
             <div class="table-wrapper">
                 <table class="table">
+
                     <thead>
                         <tr>
-                            <th>#</th>
+                            <th>ลำดับ</th>
                             <th>ID</th>
                             <th>สินค้า</th>
                             <th>พนักงาน</th>
                             <th>ลูกค้า</th>
+                            <th>วันที่ทำรายการ</th>
+                            <th>ครบกำหนด</th>
+
+                            @if (auth()->user()->role_id == 3)
+                                <th>แก้ไข</th>
+                                @if ($showFallColumn)
+                                    <th>หลุดจำนำ</th>
+                                @endif
+                            @endif
+
                             <th>สถานะ</th>
-                            <th>จัดการ</th>
-                            <th>วางแล้วกี่วัน</th>
-                            <th>หลุดจำนำ</th>
                         </tr>
                     </thead>
 
                     <tbody>
                         @forelse ($sales as $sale)
-                            <tr>
-                                <td>{{ $sales->firstItem() + $loop->index }}</td>
 
+                            <tr onclick="window.location='{{ route('commerce.detil_sale', $sale->id) }}'"
+                                style="cursor:pointer;">
+
+                                <td>{{ $sales->firstItem() + $loop->index }}</td>
                                 <td>{{ $sale->id }}</td>
 
-                                <td>{{ $sale->product_name ?? '-' }}</td>
+                                <td>{{ $sale->brand ?? '-' }} {{ $sale->model ?? '-' }}</td>
 
                                 <td>{{ $sale->user_r->name ?? '-' }}</td>
 
-                                <td>{{ $sale->member_r->name ?? '-' }}</td>
+                                <td>{{ $sale->member_r->fullname ?? '-' }}</td>
 
-                                <td>{{ $sale->created_at ?? '-' }}</td>
+                                <td>{{ $sale->created_at->format('d/m/y') }}</td>
 
-                                <td>{{ $sale->member_r->name ?? '-' }}</td>
+                                <td>{{ $sale->appointment_date->format('d/m/y') }}</td>
 
-                                <td class="status active">
-                                    {{ $sale->status ?? 'ปกติ' }}
-                                </td>
+                                @if (auth()->user()->role_id == 3)
+                                    <td onclick="event.stopPropagation()">
+                                        <a href="{{ route('commerce.create_pawning', $sale->id) }}" class="btn-edit">
+                                            Edit
+                                        </a>
+                                    </td>
 
-                                <td class="edit-col">
-                                    <a href="{{ route('commerce.create_pawning', $sale->id) }}" class="btn-edit">
-                                        Edit
-                                    </a>
-                                </td>
-                                @if (auth()->user()->role_id == 1)
-                                    <td><a href="{{ route('commerce.slip', $sale->id) }}" class="btn-delete">หลุด</a></td>
+                                    @if ($showFallColumn)
+                                        <td onclick="event.stopPropagation()">
+                                            @if ($sale->status != 'fall')
+                                                <a href="{{ route('commerce.slip', $sale->id) }}" class="btn-delete">
+                                                    หลุด
+                                                </a>
+                                            @endif
+                                        </td>
+                                    @endif
                                 @endif
+
+                                <td>
+                                    {{ match ($sale->status) {
+                                        'between' => 'จำนำอยู่',
+                                        'fall' => 'หลุด',
+                                        'problem' => 'มีปัญหา',
+                                        'closed' => 'ปิดรายการ',
+                                        'bad' => 'ไม่รับ',
+                                        default => 'ปกติ',
+                                    } }}
+                                </td>
+
                             </tr>
+
                         @empty
                             <tr>
-                                <td colspan="7" style="text-align:center;">
-                                    ไม่มีข้อมูล
-                                </td>
+                                <td colspan="10" style="text-align:center;">ไม่มีข้อมูล</td>
                             </tr>
                         @endforelse
+
                     </tbody>
                 </table>
             </div>

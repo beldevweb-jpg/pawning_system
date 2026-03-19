@@ -23,8 +23,27 @@
         </form>
     </header>
 
-    <div style="max-width:1100px;margin:auto">
+    <div style="max-width:1500px;margin:auto">
+        @if (auth()->user()->role_id == 3)
+            <nav>
+                <a href="{{ route('commerce.report_sellfront') }}">
+                    {{ request()->routeIs('commerce.report_sellfront') ? '► ' : '' }}รายการรับจ่าย
+                </a> |
 
+                <a href="{{ route('commerce.sale_list') }}">
+                    {{ request()->routeIs('commerce.sale_list') ? '► ' : '' }}รายการจำนำ
+                </a> |
+
+                <a href="{{ route('user.index') }}">
+                    {{ request()->routeIs('user.*') ? '► ' : '' }}จัดการพนักงาน
+                </a> |
+
+                <a href="{{ route('commerce.show_member') }}">
+                    {{ request()->routeIs('commerce.show_member') ? '► ' : '' }}รายชื่อลูกค้า
+                </a>
+            </nav>
+            <hr>
+        @endif
         <h1>📊 รายรับรายจ่ายขายหน้าร้าน</h1>
         @if (session('success'))
             <div class="msg ok">

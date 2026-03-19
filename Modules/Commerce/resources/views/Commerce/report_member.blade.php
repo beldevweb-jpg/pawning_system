@@ -22,7 +22,7 @@
         </form>
     </header>
 
-    <div class="container">
+    <div class="container" style="max-width:1500px;margin:auto">
         <div class="card">
 
             {{-- แจ้งเตือน --}}
@@ -43,65 +43,94 @@
             <div class="card-header">
                 <div class="header-left">
                     <h2>ข้อมูล user</h2>
+                    <span class="subtitle">user</span>
                 </div>
-                <form method="GET" id="searchForm" action="{{ route('commerce.search_member') }}">
-                    <input type="text" name="keyword" placeholder="ค้นหา..." value="{{ request('keyword') }}"
-                        autocomplete="off" id="searchInput">
-                </form>
 
-                <script>
-                    let timer;
+                @foreach ($member as $members)
+                    <a href="{{ route('commerce.create_pawning', $members->member_id) }}">
+                        ดำเนินรายการ
+                    </a>
+                @endforeach
+            </div>
 
-                    document.getElementById('searchInput').addEventListener('input', function() {
-                        clearTimeout(timer);
-                        timer = setTimeout(() => {
-                            document.getElementById('searchForm').submit();
-                        }, 500); // รอ 0.5 วิ
-                    });
-                </script>
-                <!-- Table -->
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ลำดับ</th>
-                                <th>เลขตั๋ว</th>
+            <script>
+                let timer;
+
+                document.getElementById('searchInput').addEventListener('input', function() {
+                    clearTimeout(timer);
+                    timer = setTimeout(() => {
+                        document.getElementById('searchForm').submit();
+                    }, 500); // รอ 0.5 วิ
+                });
+            </script>
+            <!-- Table -->
+            <div class="table-wrapper">
+                @php
+                    $hasBrandModel = false;
+
+                    foreach ($member as $m) {
+                        foreach ($m->sales_r as $s) {
+                            if (!empty($s->brand) || !empty($s->model)) {
+                                $hasBrandModel = true;
+                                break 2;
+                            }
+                        }
+                    }
+                @endphp
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ลำดับ</th>
+                            <th>เลขตั๋ว</th>
+
+                            @if ($hasBrandModel)
                                 <th>ยี่ห้อ</th>
                                 <th>รุ่น</th>
-                                <th>รหัสเครื่อง</th>
-                                <th>ชื่อลูกค้า</th>
-                                <th>ประเภทบริการ</th>
-                            </tr>
-                        </thead>
+                            @else
+                                <th>รายการ</th>
+                            @endif
 
-                        <tbody>
-                            @foreach ($member as $item)
-                                @forelse ($item->sales_r as $sale)
-                                    <tr class="clickable-row"
-                                        onclick="window.location='{{ route('commerce.show_sale', $sale->id) }}'">
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $sale->id }}</td>
+                            <th>รหัสเครื่อง</th>
+                            <th>ชื่อลูกค้า</th>
+                            <th>ประเภทบริการ</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach ($member as $item)
+                            @forelse ($item->sales_r as $sale)
+                                <tr class="clickable-row"
+                                    onclick="window.location='{{ route('commerce.show_sale', $sale->id) }}'">
+
+                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $sale->id }}</td>
+
+                                    @if ($hasBrandModel)
                                         <td>{{ $sale->brand }}</td>
                                         <td>{{ $sale->model }}</td>
-                                        <td>{{ $sale->serial_number }}</td>
-                                        <td>{{ $item->fullname }}</td>
-                                        <td>
-                                            @if ($sale->type_serve == 'pawm')
-                                                จำนำ
-                                            @else
-                                                ขาย
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="6">ไม่พบข้อมูล</td>
-                                    </tr>
-                                @endforelse
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+                                    @else
+                                        <td>{{ $sale->other_type }} </td>
+                                    @endif
+
+                                    <td>{{ $sale->serial_number }}</td>
+                                    <td>{{ $item->fullname }}</td>
+                                    <td>
+                                        @if ($sale->type_serve == 'pawm')
+                                            จำนำ
+                                        @else
+                                            ขาย
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6">ไม่พบข้อมูล</td>
+                                </tr>
+                            @endforelse
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
 
 
 

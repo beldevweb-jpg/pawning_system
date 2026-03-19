@@ -11,17 +11,42 @@
 <body>
 
     <!-- Top Header -->
-    <header class="header">
-        <div class="user">
-            <span class="avatar">👤</span>
-            <span>username</span>
+    <header style="display:flex;justify-content:space-between;padding:15px;">
+        <div>
+            👤 {{ auth()->user()->name ?? '' }}
         </div>
-        <button type="button" class="logout">ออกจากระบบ</button>
+
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button style="background:red;color:white;border:none;padding:8px 12px;border-radius:6px">
+                ออกจากระบบ
+            </button>
+        </form>
     </header>
 
-    <div class="container">
-        <div class="card">
+    <div class="container" style="max-width:1500px;margin:auto">
+        @if (auth()->user()->role_id == 3)
+            <nav>
+                <a href="{{ route('commerce.report_sellfront') }}">
+                    {{ request()->routeIs('commerce.report_sellfront') ? '► ' : '' }}รายการรับจ่าย
+                </a> |
 
+                <a href="{{ route('commerce.sale_list') }}">
+                    {{ request()->routeIs('commerce.sale_list') ? '► ' : '' }}รายการจำนำ
+                </a> |
+
+                <a href="{{ route('user.index') }}">
+                    {{ request()->routeIs('user.*') ? '► ' : '' }}จัดการพนักงาน
+                </a> |
+
+                <a href="{{ route('commerce.show_member') }}">
+                    {{ request()->routeIs('commerce.show_member') ? '► ' : '' }}รายชื่อลูกค้า
+                </a>
+            </nav>
+            <hr>
+        @endif
+
+        <div class="card">
             {{-- แจ้งเตือน --}}
             @if (session('success'))
                 <div class="msg ok">
@@ -36,17 +61,20 @@
                     @endforeach
                 </div>
             @endif
+
             <!-- Card Header -->
-            <div class="card-header">
+            <div class="page-header">
                 <div class="header-left">
                     <h2>ข้อมูล user</h2>
+                    <span class="subtitle">member</span>
                 </div>
 
                 <div class="header-right">
+                    <a href="{{ route('register') }}">+ เพิ่มผู้ใช้</a>
                     <input type="text" class="search-box" placeholder="ค้นหา..." />
                 </div>
-            </div>
 
+            </div>
 
             <!-- Table -->
             <div class="table-wrapper">
@@ -89,6 +117,7 @@
                     </tbody>
                 </table>
             </div>
+        </div>
 
 
 

@@ -75,12 +75,11 @@
                             <button type="button" class="edit-link" onclick="toggleEdit()">
                                 แก้ไข
                             </button>
-
                         </div>
                         <!-- หมายเหตุ -->
                         <div id="noteSection" class="form-row column" style="display:none;">
                             <label>หมายเหตุ</label>
-                            <textarea class="textarea" placeholder="(แสดงหลังตัดแก้ไข)"></textarea>
+                            <textarea name="note" id="note" class="textarea" placeholder="(แสดงหลังตัดแก้ไข)"></textarea>
                         </div>
                     </div>
                 </div>
@@ -156,9 +155,11 @@
         const transfer = parseNumber(transferInput.value);
         const cash = parseNumber(cashInput.value);
 
+        const noteInput = document.getElementById("note");
+
         const paid = transfer + cash;
 
-        if (paid === dok) {
+        if (paid === dok && noteInput !== "") {
             paymentWarning.style.display = "none";
             confirmBtn.disabled = false;
         } else {
@@ -166,7 +167,7 @@
             confirmBtn.disabled = true;
         }
     }
-
+    
     function autoFormat(e) {
         const val = parseNumber(e.target.value);
 

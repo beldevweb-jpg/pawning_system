@@ -28,6 +28,13 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        $user = auth()->user();
+
+        if (in_array($user->role_id, [1, 3]) && $user->status == 'active') {
+            return redirect()->route('commerce.sale_list');
+        }
+
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 
@@ -42,6 +49,6 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect('/login');
     }
 }
