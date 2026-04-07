@@ -40,10 +40,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     route::post('/pueam/store/{id?}', [CommerceController::class, 'store_pueam'])
         ->name('commerce.pueam_store');
 
-    route::get('/create_sellfront/{id?}', [CommerceController::class, 'create_sellfront'])->name('commerce.create_sellfront');
-    Route::post('/sellfront/store', [CommerceController::class, 'store_sellfront'])
-        ->name('commerce.store_sellfront');
-    route::get('/sellfront/report', [CommerceController::class, 'report_sellfront'])->name('commerce.report_sellfront');
+    route::get('/create_salefront/{id?}', [CommerceController::class, 'create_salefront'])->name('commerce.create_salefront');
+    Route::post('/salefront/store', [CommerceController::class, 'store_salefront'])
+        ->name('commerce.store_salefront');
+    route::get('/report_salefront', [CommerceController::class, 'report_salefront'])->name('commerce.report_salefront');
 
 
 
@@ -55,12 +55,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     route::get('/detil_sale/{id}', [CommerceController::class, 'detil_sale'])->name('commerce.detil_sale');
     Route::get(
-        '/report-sellfront-pdf',
-        [CommerceController::class, 'reportSellfrontPdf']
+        '/report-salefront-pdf',
+        [CommerceController::class, 'reportsalefrontPdf']
     )->name('commerce.report_sale_pdf');
+
+    Route::get('/sale-list-pdf', [CommerceController::class, 'saleListPdf'])
+        ->name('commerce.sale_list_pdf');
 
     route::get('/show_member', [CommerceController::class, 'show_member'])->name('commerce.show_member');
 
     route::get('/edit_status_member/{id}', [CommerceController::class, 'edit_status_member'])->name('commerce.edit_status_member');
     route::post('/stor_edit_status_member/{id}', [CommerceController::class, 'stor_edit_status_member'])->name('commerce.stor_edit_status_member');
+
+    Route::get('/manage_dok', [CommerceController::class, 'manage_dok'])
+        ->name('commerce.manage_dok');
+
+    Route::post('/stor_manage_dok/{id}', [CommerceController::class, 'stor_manage_dok'])
+        ->name('commerce.stor_manage_dok');
+
+    Route::get('/settings', [CommerceController::class, 'settings'])
+        ->name('commerce.settings');
+
+    Route::post('/settings/save/{id?}', [CommerceController::class, 'save_settings'])
+        ->name('commerce.save_settings');
 });

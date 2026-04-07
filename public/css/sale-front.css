@@ -1,0 +1,209 @@
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600&display=swap');
+
+* {
+  box-sizing: border-box;
+  font-family: "Kanit", sans-serif;
+}
+
+/* ===== MOBILE FIRST ===== */
+
+body {
+  margin: 0;
+  background: linear-gradient(180deg, #f4f9ff, #eef5ff);
+  color: #2c3e50;
+}
+
+/* HEADER */
+.header {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 16px;
+  font-size: 14px;
+}
+
+.logout {
+  color: #2b6cff;
+  cursor: pointer;
+}
+
+/* TITLE */
+.title {
+  text-align: center;
+  color: #2d4f9c;
+  margin: 16px 0 24px;
+  font-size: 1.4rem;
+}
+
+/* CONTAINER */
+.container {
+  max-width: 100%;
+  margin: auto;
+  padding: 0 16px 60px;
+}
+
+/* CARD */
+.card {
+  background: linear-gradient(180deg, #f9fbff, #f1f6ff);
+  border-radius: 20px;
+  padding: 18px;
+  box-shadow: none; /* มือถือเอาเรียบๆ */
+}
+
+/* FORM */
+.form-row {
+  display: flex;
+  flex-direction: column; /* 🔥 สำคัญ */
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.form-row.column {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.form-row label {
+  font-size: 14px;
+  color: #6b7a90;
+}
+
+/* INPUT */
+.input {
+  width: 100%;
+  height: 50px;
+  border-radius: 16px;
+  border: none;
+  padding: 0 14px;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px #dde6ff;
+  font-size: 16px;
+}
+
+/* PAY TYPE */
+.pay-type {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+
+/* MINI BUTTON */
+.mini-btn {
+  width: 100%;
+  height: 44px;
+  border-radius: 16px;
+  border: none;
+  background: #ffffff;
+  box-shadow: 0 4px 8px rgba(0,0,0,.08);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.mini-btn:hover {
+  background: #e9f0ff;
+}
+
+/* RADIO */
+.option {
+  display: flex;
+  flex-direction: column; /* มือถือเรียงลง */
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.option label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.option input {
+  accent-color: #4a90e2;
+}
+
+/* SUBMIT */
+.submit {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column; /* มือถือเรียงลง */
+  gap: 12px;
+}
+
+.submit button {
+  width: 100%;
+  height: 50px;
+  border-radius: 18px;
+  border: none;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* BUTTONS */
+.danger {
+  background: #ff2d2d;
+  color: white;
+}
+
+.primary {
+  background: linear-gradient(180deg, #4d7cff, #3b66e6);
+  color: white;
+}
+
+.primary:hover {
+  box-shadow: 0 8px 18px rgba(77, 124, 255, 0.35);
+}
+
+/* ===== TABLET & DESKTOP ===== */
+@media (min-width: 768px) {
+
+  .header {
+    padding: 16px 20px;
+    font-size: 16px;
+  }
+
+  .title {
+    font-size: 1.8rem;
+    margin: 20px 0 30px;
+  }
+
+  .container {
+    max-width: 600px;
+    padding: 0 20px 80px;
+  }
+
+  .card {
+    padding: 24px;
+    border-radius: 24px;
+    box-shadow: 0 10px 25px rgba(70, 120, 255, 0.12);
+  }
+
+  /* กลับเป็นแนวนอน */
+  .form-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .form-row label {
+    min-width: 80px;
+  }
+
+  .pay-type {
+    flex-direction: row;
+  }
+
+  .mini-btn {
+    width: auto;
+    padding: 0 20px;
+  }
+
+  .option {
+    flex-direction: row;
+    justify-content: center;
+    gap: 40px;
+  }
+
+  .submit {
+    flex-direction: row;
+    gap: 20px;
+  }
+}

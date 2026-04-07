@@ -43,15 +43,18 @@
             </div>
         @endif
         <section class="menu-card">
-            <a href="{{ route('commerce.create_pawning', $member->member_id) }}" class="menu-item btn-pawm">
+            <a href="{{ route('commerce.create_pawning', ['id' => $member->member_id, 'mode' => 'create']) }}"
+                class="menu-item btn-pawm">
                 ขาย
             </a>
 
-            <a href="{{ route('commerce.create_pawning', $member->member_id) }}" class="menu-item btn-pawm">
+            <a href="{{ route('commerce.create_pawning', ['id' => $member->member_id, 'mode' => 'create']) }}"
+                class="menu-item btn-pawm">
                 บริการ
             </a>
 
-            <a href="{{ route('commerce.create_sellfront', $member->member_id) }}" class="menu-item btn-pawm">
+            <a href="{{ route('commerce.create_salefront', ['id' => $member->member_id, 'mode' => 'create']) }}"
+                class="menu-item btn-pawm">
                 ขายหน้าร้าน
             </a>
         </section>

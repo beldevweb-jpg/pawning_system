@@ -7,114 +7,108 @@
     font-family: "Kanit", sans-serif;
 }
 
-/* PAGE */
+/* ===== BASE (MOBILE FIRST) ===== */
 
 body {
-    margin: 0;
     background: #eaf8ff;
 }
 
+/* HEADER */
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 14px 20px;
+    padding: 12px 16px;
+    font-size: 14px;
 }
 
-.user {
+/* ===== NAV (SCROLL MOBILE) ===== */
+
+nav {
     display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 500;
+    flex-wrap: nowrap;                 /* ไม่ให้ขึ้นบรรทัด */
+    overflow-x: auto;                  /* เลื่อนซ้าย-ขวา */
+    -webkit-overflow-scrolling: touch;
+    gap: 8px;
+    padding: 8px 0;
 }
 
-.avatar {
-    background: #e3ecff;
-    border-radius: 50%;
-    padding: 6px 8px;
+/* ซ่อน scrollbar */
+nav::-webkit-scrollbar {
+    display: none;
 }
 
-.logout {
-    background: #ffffff;
-    border: none;
-    padding: 6px 14px;
-    border-radius: 20px;
-    cursor: pointer;
-    color: #2b6cff;
-    font-weight: 500;
+nav a {
+    white-space: nowrap;
+    text-decoration: none;
+    color: #6c2bd9;
+    background: #f3f0ff;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
 }
 
 /* CONTAINER */
-
 .container {
-    padding: 30px;
+    padding: 16px;
     min-height: 100vh;
 }
 
-
 /* CARD */
-
 .card {
     background: #ffffff;
-    border-radius: 14px;
-    padding: 20px;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: none;
 }
 
-
-/* HEADER */
-
+/* PAGE HEADER */
 .page-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    gap: 20px;
+    flex-direction: column;
+    align-items: stretch;
+    margin-bottom: 16px;
+    gap: 12px;
 }
 
 .header-left h2 {
-    font-size: 22px;
+    font-size: 18px;
     font-weight: 600;
-    color: #000;
 }
 
 .header-left .subtitle {
-    font-size: 13px;
+    font-size: 12px;
     color: #666;
 }
 
 .header-right {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    width: 100%;
 }
 
-/* SEARCH BOX */
-
+/* SEARCH */
 .search-box {
-    width: 180px;
-    padding: 6px 12px;
+    width: 100%;
+    padding: 10px 12px;
     border-radius: 10px;
     border: 2px solid #000;
-    outline: none;
-    font-size: 14px;
+    font-size: 16px;
 }
 
-
-/* TABLE WRAPPER */
+/* ===== TABLE ===== */
 
 .table-wrapper {
-    border: 2px solid #000;
-    border-radius: 6px;
-    overflow: hidden;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 8px;
 }
 
-
-/* TABLE */
-
+/* กัน table พัง */
 table {
     width: 100%;
+    min-width: 750px;
     border-collapse: collapse;
+    background: white;
 }
 
 thead {
@@ -124,28 +118,19 @@ thead {
 th,
 td {
     padding: 10px;
-    font-size: 14px;
+    font-size: 13px;
     text-align: center;
-    border-bottom: 1px solid #000;
-    border-right: 1px solid #000;
+    border-bottom: 1px solid #ddd;
+    white-space: nowrap;
 }
 
-th:last-child,
-td:last-child {
-    border-right: none;
-}
-
-
-/* ROW EFFECT */
-
+/* hover */
 tbody tr:hover {
     background: #eaf8ff;
     cursor: pointer;
 }
 
-
 /* STATUS */
-
 .status {
     font-weight: 600;
 }
@@ -162,23 +147,65 @@ tbody tr:hover {
     color: #d32f2f;
 }
 
+/* ===== TABLET ===== */
+@media (min-width: 600px) {
 
-/* RESPONSIVE */
-
-@media (max-width: 768px) {
-    .page-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
+    .container {
+        padding: 20px;
     }
 
-    .search-box {
-        width: 100%;
+    .card {
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
     }
 
     th,
     td {
-        font-size: 12px;
-        padding: 8px;
+        font-size: 14px;
+    }
+}
+
+/* ===== DESKTOP ===== */
+@media (min-width: 768px) {
+
+    .header {
+        padding: 14px 20px;
+        font-size: 16px;
+    }
+
+    .container {
+        padding: 30px;
+    }
+
+    .card {
+        padding: 20px;
+        border-radius: 14px;
+    }
+
+    .page-header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .header-left h2 {
+        font-size: 22px;
+    }
+
+    .header-left .subtitle {
+        font-size: 13px;
+    }
+
+    .header-right {
+        width: auto;
+    }
+
+    .search-box {
+        width: 200px;
+        font-size: 14px;
+        padding: 6px 12px;
+    }
+
+    table {
+        min-width: auto;
     }
 }

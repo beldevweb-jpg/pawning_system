@@ -45,8 +45,8 @@
                 <!-- รูป -->
                 <div class="image-grid">
                     @if (!empty($sale->product_images))
-                        @foreach (array_slice(json_decode($sale->product_images), 0, 3) as $img)
-                            <div class ="image-box">
+                        @foreach (array_slice(json_decode($sale->product_images, true) ?? [], 0, 3) as $img)
+                            <div class="image-box">
                                 <img src="{{ asset('storage/' . $img) }}"
                                     style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
                             </div>
@@ -69,56 +69,54 @@
                         <label>ดอก</label>
                         <div class="plus-line">
                             <span>+</span>
-                            <input id="interestInput" value="{{ $sale->dok }}" name="dok" class="input" type="text" inputmode="numeric"
-                                readonly>
+                            <input id="interestInput" value="{{ $sale->dok }}" name="dok" class="input"
+                                type="text" inputmode="numeric" readonly>
                             <button type="button" class="edit-link" onclick="toggleEdit()">
                                 แก้ไข
                             </button>
-
                         </div>
                         <!-- หมายเหตุ -->
                         <div id="noteSection" class="form-row column" style="display:none;">
                             <label>หมายเหตุ</label>
-                            <textarea class="textarea" placeholder="(แสดงหลังตัดแก้ไข)"></textarea>
+                            <textarea name="note_dok" id="note" class="textarea" placeholder="(แสดงหลังตัดแก้ไข)"></textarea>
                         </div>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label>รวมต้องจ่าย</label>
-                    <input id="totalInput" name="total_price" class="input" readonly>
-                </div>
-
-                <!-- การชำระเงิน -->
-                <h3 class="section-title">การชำระเงิน</h3>
-                <div class="grid-2">
                     <div class="form-group">
-                        <label>เงินโอน</label>
-                        <input class="input" name="transfer" id="transferInput" type="text" inputmode="numeric">
+                        <label>รวมต้องจ่าย</label>
+                        <input id="totalInput" name="total_price" class="input" readonly>
+                    </div>
+
+                    <!-- การชำระเงิน -->
+                    <h3 class="section-title">การชำระเงิน</h3>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>เงินโอน</label>
+                            <input class="input" name="transfer" id="transferInput" type="text" inputmode="numeric">
+                        </div>
+
+                        <div class="form-group">
+                            <label>เงินสด</label>
+                            <input class="input" name="cash" id="cashInput" type="text" inputmode="numeric">
+                        </div>
                     </div>
 
                     <div class="form-group">
-                        <label>เงินสด</label>
-                        <input class="input" name="cash" id="cashInput" type="text" inputmode="numeric">
+                        <label>แนบสลิป</label>
+
+                        <input type="file" class="file-input" accept="image/*" name="slip">
+                    </div>
+
+                    <div class="submit">
+                        <button type="button" class="btn cancel" id="clearForm">
+                            ยกเลิก
+                        </button>
+
+                        <button type="submit" class="btn confirm">
+                            ดำเนินการต่อ
+                        </button>
                     </div>
                 </div>
-
-                <div class="form-group">
-                    <label>แนบสลิป</label>
-
-                    <input type="file" class="file-input" accept="image/*" name="slip">
-                </div>
-
-                <div class="submit">
-                    <button type="button" class="btn cancel" id="clearForm">
-                        ยกเลิก
-                    </button>
-
-                    <button type="submit" class="btn confirm">
-                        ดำเนินการต่อ
-                    </button>
-                </div>
-            </div>
         </form>
     </div>
 </body>

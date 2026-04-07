@@ -25,8 +25,8 @@
     <div class="container" style="max-width:1500px;margin:auto">
         @if (auth()->user()->role_id == 3)
             <nav>
-                <a href="{{ route('commerce.report_sellfront') }}">
-                    {{ request()->routeIs('commerce.report_sellfront') ? '► ' : '' }}รายการรับจ่าย
+                <a href="{{ route('commerce.report_salefront') }}">
+                    {{ request()->routeIs('commerce.report_salefront') ? '► ' : '' }}รายการรับจ่าย
                 </a> |
 
                 <a href="{{ route('commerce.sale_list') }}">
@@ -39,7 +39,17 @@
 
                 <a href="{{ route('commerce.show_member') }}">
                     {{ request()->routeIs('commerce.show_member') ? '► ' : '' }}รายชื่อลูกค้า
-                </a>
+
+                </a>|
+
+                <a href="{{ route('commerce.manage_dok') }}">
+                    {{ request()->routeIs('commerce.manage_dok') ? '► ' : '' }}จัดการคอกเบี้ยต่อเดือน
+
+                </a>|
+
+                <a href="{{ route('commerce.settings') }}">
+                    {{ request()->routeIs('commerce.settings') ? '► ' : '' }}ตั้งค่าอื่นๆ
+                </a> |
             </nav>
             <hr>
         @endif
@@ -49,10 +59,10 @@
                     <h2>รายชื่อลูกค้า</h2>
                     <span class="subtitle">member</span>
                 </div>
-
-                <div class="header-right">
-                    <input type="text" class="search-box" placeholder="ค้นหา..." />
-                </div>
+                <form method="GET" action="{{ route('commerce.search_member') }}" class="header-right">
+                    <input type="text" name="search" class="search-box" placeholder="ค้นหา..."
+                        value="{{ request('search') }}" />
+                </form>
             </div>
 
             <div class="table-wrapper">
@@ -90,12 +100,7 @@
                     </tbody>
                 </table>
             </div>
-
-            <!-- Pagination -->
-            <div class="pagination-wrapper">
-                {{ $member->links() }}
-            </div>
-
+            {{ $member->links('pagination::simple-tailwind') }}
         </div>
     </div>
 </body>

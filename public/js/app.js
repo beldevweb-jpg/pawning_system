@@ -46,6 +46,8 @@ document.addEventListener("DOMContentLoaded", () => {
     toggleOther("type_category", "type-other", "type-other-input");
     // 3. ยี่ห้อ (iPhone/.../อื่นๆ)
     toggleOther("brand", "brand-other", "brand-other-input");
+    // 4. อื่นๆ ของ กรอกรเพิ่มเติม 
+    toggleOther("action_type", "action-other", "action-other-input");
 
 
     /* =====================
@@ -256,4 +258,3 @@ function calculateTotalPay() {
     window.onload = calculateTotalPay;
     document.getElementById('totalInput').value = total.toFixed(2);
 }
-

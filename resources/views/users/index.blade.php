@@ -27,8 +27,8 @@
     <div class="container" style="max-width:1500px;margin:auto">
         @if (auth()->user()->role_id == 3)
             <nav>
-                <a href="{{ route('commerce.report_sellfront') }}">
-                    {{ request()->routeIs('commerce.report_sellfront') ? '► ' : '' }}รายการรับจ่าย
+                <a href="{{ route('commerce.report_salefront') }}">
+                    {{ request()->routeIs('commerce.report_salefront') ? '► ' : '' }}รายการรับจ่าย
                 </a> |
 
                 <a href="{{ route('commerce.sale_list') }}">
@@ -41,7 +41,17 @@
 
                 <a href="{{ route('commerce.show_member') }}">
                     {{ request()->routeIs('commerce.show_member') ? '► ' : '' }}รายชื่อลูกค้า
-                </a>
+
+                </a>|
+
+                <a href="{{ route('commerce.manage_dok') }}">
+                    {{ request()->routeIs('commerce.manage_dok') ? '► ' : '' }}จัดการคอกเบี้ยต่อเดือน
+
+                </a>|
+
+                <a href="{{ route('commerce.settings') }}">
+                    {{ request()->routeIs('commerce.settings') ? '► ' : '' }}ตั้งค่าอื่นๆ
+                </a> |
             </nav>
             <hr>
         @endif

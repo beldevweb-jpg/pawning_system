@@ -45,8 +45,8 @@
                 <!-- รูป -->
                 <div class="image-grid">
                     @if (!empty($sale->product_images))
-                        @foreach (array_slice(json_decode($sale->product_images), 0, 3) as $img)
-                            <div class ="image-box">
+                        @foreach (array_slice(json_decode($sale->product_images, true) ?? [], 0, 3) as $img)
+                            <div class="image-box">
                                 <img src="{{ asset('storage/' . $img) }}"
                                     style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
                             </div>

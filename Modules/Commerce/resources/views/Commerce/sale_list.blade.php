@@ -24,8 +24,8 @@
     <div class="container" style="max-width:1500px;margin:auto">
         @if (auth()->user()->role_id == 3)
             <nav>
-                <a href="{{ route('commerce.report_sellfront') }}">
-                    {{ request()->routeIs('commerce.report_sellfront') ? '► ' : '' }}รายการรับจ่าย
+                <a href="{{ route('commerce.report_salefront') }}">
+                    {{ request()->routeIs('commerce.report_salefront') ? '► ' : '' }}รายการรับจ่าย
                 </a> |
 
                 <a href="{{ route('commerce.sale_list') }}">
@@ -38,7 +38,17 @@
 
                 <a href="{{ route('commerce.show_member') }}">
                     {{ request()->routeIs('commerce.show_member') ? '► ' : '' }}รายชื่อลูกค้า
-                </a>
+
+                </a>|
+
+                <a href="{{ route('commerce.manage_dok') }}">
+                    {{ request()->routeIs('commerce.manage_dok') ? '► ' : '' }}จัดการคอกเบี้ยต่อเดือน
+
+                </a>|
+
+                <a href="{{ route('commerce.settings') }}">
+                    {{ request()->routeIs('commerce.settings') ? '► ' : '' }}ตั้งค่าอื่นๆ
+                </a> |
             </nav>
             <hr>
         @endif
@@ -55,19 +65,33 @@
                     <input type="text" class="search-box" placeholder="ค้นหา..." />
                 </div>
             </div>
+            <form method="GET" action="">
+                <select name="status">
+                    <option value="">สถานะทั้งหมด</option>
+                    <option value="between">จำนำอยู่</option>
+                    <option value="fall">หลุด</option>
+                    <option value="problem">มีปัญหา</option>
+                    <option value="closed">ปิดรายการ</option>
+                    <option value="bad">ไม่รับ</option>
+                </select>
 
-            <!-- TABLE -->
+                <input type="text" name="search" placeholder="ค้นหา...">
+
+                <button type="submit">ค้นหา</button>
+            </form>
             @php
                 $showFallColumn = $sales->where('status', '!=', 'fall')->count() > 0;
             @endphp
 
             <div class="table-wrapper">
+                <a href="{{ route('commerce.sale_list_pdf', request()->all()) }}" target="_blank">
+                    📄 Export PDF
+                </a>
                 <table class="table">
-
                     <thead>
                         <tr>
                             <th>ลำดับ</th>
-                            <th>ID</th>
+                            <th>เลขตั๋ว</th>
                             <th>สินค้า</th>
                             <th>พนักงาน</th>
                             <th>ลูกค้า</th>
@@ -92,7 +116,7 @@
                                 style="cursor:pointer;">
 
                                 <td>{{ $sales->firstItem() + $loop->index }}</td>
-                                <td>{{ $sale->id }}</td>
+                                <td>{{ $sale->running_no }}</td>
 
                                 <td>{{ $sale->brand ?? '-' }} {{ $sale->model ?? '-' }}</td>
 
@@ -102,8 +126,7 @@
 
                                 <td>{{ $sale->created_at->format('d/m/y') }}</td>
 
-                                <td>{{ $sale->appointment_date->format('d/m/y') }}</td>
-
+                                <td>{{ optional($sale->appointment_date)->format('d/m/y') ?? '-' }}</td>
                                 @if (auth()->user()->role_id == 3)
                                     <td onclick="event.stopPropagation()">
                                         <a href="{{ route('commerce.create_pawning', $sale->id) }}" class="btn-edit">
@@ -145,15 +168,12 @@
                 </table>
             </div>
 
-            <!-- Pagination -->
-            <div class="pagination-wrapper">
-                {{ $sales->links() }}
-            </div>
+            {{ $sales->links('pagination::simple-tailwind') }}
+
 
         </div>
     </div>
 
 
 </body>
-
 </html>

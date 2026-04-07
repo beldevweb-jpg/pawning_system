@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>เพิ่มข้อมูลลูกค้า</title>
     <link rel="stylesheet" href="{{ asset('css/add-customer.css') }}">
     <link rel="stylesheet" href="{{ asset('css/error.css') }}">
@@ -47,7 +48,7 @@
                     @endforeach
                 </div>
             @endif
-            
+
             <div class="form-row">
                 <label>เลขบัตรประชาชน</label>
                 <input type="text" name="tax_number" id="idcard" placeholder="กรอกเลขบัตรประชาชน">
@@ -85,8 +86,9 @@
             </div>
     </form>
 
-    </div>
-    <script src="{{ asset('js/app.js') }}" defer></script>
+
+        </div>
 </body>
+<script src="{{ asset('js/app.js') }}" defer></script>
 
 </html>

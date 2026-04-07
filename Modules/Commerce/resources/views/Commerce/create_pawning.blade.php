@@ -3,11 +3,13 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>โอ๋ โมบาย</title>
     <link rel="stylesheet" href="{{ asset('css/pawning.css') }}">
 </head>
 @php
-    $isView = !empty($sale?->id);
+    $mode = request('mode', 'create'); // รับ query string 'mode'
+    $isView = $mode === 'view';
 @endphp
 
 <body>
@@ -46,24 +48,41 @@
                 @if ($sale_between)
                     <div class="card">
                         <h2>ประเภท</h2>
-                        <div class="radio-group">
+
+                        <div class="action-vertical">
+
+                            <!-- วาง -->
                             <label class="option">
                                 <input type="radio" name="action_type" value="wand"
-                                    {{ old('action_type') == 'wand' ? 'checked' : '' }}>
+                                    {{ old('action_type', $sale->action_type ?? '') == 'wand' ? 'checked' : '' }}>
                                 วาง
                             </label>
-                            <a href="{{ route('commerce.dok', $sale->id) }}" class="btn-option"> ต่อ </a> <a
-                                href="{{ route('commerce.tai', $sale->id) }}" class="btn-option"> ไถ่ </a> <a
-                                href="{{ route('commerce.pueam', $sale->id) }}" class="btn-option"> เพิ่ม </a>
+
+                            <!-- ต่อ -->
+                            @if ($isView)
+                                <a href="{{ route('commerce.dok', $sale->id) }}" class="btn-option yellow">ต่อ</a>
+                            @endif
+
+                            <!-- ไถ่ -->
+                            @if ($isView)
+                                <a href="{{ route('commerce.tai', $sale->id) }}" class="btn-option green">ไถ่</a>
+                            @endif
+
+                            <!-- เพิ่ม -->
+                            @if ($isView)
+                                <a href="{{ route('commerce.pueam', $sale->id) }}" class="btn-option blue">เพิ่ม</a>
+                            @endif
+
+                            <!-- อื่นๆ -->
                             <label class="option">
-                                <input type="radio" name="action_type" value="other"
-                                    {{ old('action_type') == 'other' ? 'checked' : '' }}>
+                                <input type="radio" id="action-other" name="action_type"
+                                    {{ old('action_type', $sale->action_type ?? '') == 'other' ? 'checked' : '' }}>
                                 อื่นๆ
                             </label>
+                            <input class="input" id="action-other-input" name="action_type_other"
+                                value="{{ old('action_type_other') }}" placeholder="กรอกประเภท" disabled>
                         </div>
-
-                        <input class="input" name="action_type_other" value="{{ old('action_type_other') }}"
-                            placeholder="กรอกประเภท">
+                    </div>
                 @endif
 
                 <div class="card">
@@ -150,10 +169,13 @@
                                 {{ $selectedBrand == 'vivo' ? 'checked' : '' }}>
                             vivo
                         </label>
+                        @php
+                            $selectedBrand = old('brand', $sale->brand ?? ($sale->other_brand ? 'other' : ''));
+                        @endphp
 
                         <div class="option-other">
                             <label class="option">
-                                <input type="radio" id="brand-other" name="other"
+                                <input type="radio" id="brand-other" name="brand" value="other"
                                     {{ $selectedBrand == 'other' ? 'checked' : '' }}>
                                 อื่นๆ
                             </label>
@@ -198,27 +220,38 @@
                     <input class="input" name="note" type="text"
                         value="{{ old('note', $sale->note ?? '') }}">
                 </div>
-
                 <div class="card">
                     <div class="form-row">
                         <label>วันที่นัดรับเครื่อง</label>
                         <input class="input" name="appointment_date" type="date"
                             value="{{ old('appointment_date', $sale->appointment_date?->format('Y-m-d')) }}">
-
                     </div>
                     <div class="form-row">
-                        <label>รูปภาพสินค้า</label>
-                        <input type="file" name="product_images[]" id="product-image" accept="image/*"
-                            capture="environment" multiple>
-                        <div id="preview" style="display:flex; gap:10px; margin-top:10px;">
+                        <label>รูปบัตรประชาชน</label>
+                        <input type="file" name="product_images" accept="image/*" capture="environment">
+
+                        <div style="margin-top:10px;">
                             @if (!empty($sale->product_images))
-                                @foreach (array_slice(json_decode($sale->product_images), 0, 3) as $img)
-                                    <img src="{{ asset('storage/' . $img) }}"
-                                        style="width:80px; height:80px; object-fit:cover; border-radius:8px;">
-                                @endforeach
+                                <img src="{{ asset('storage/' . $sale->product_images) }}"
+                                    style="width:80px; height:80px; object-fit:cover; border-radius:8px;">
+                            @else
+                                <span>ไม่มีรูป</span>
                             @endif
                         </div>
+                    </div>
 
+                    <div class="form-row">
+                        <label>รูปภาพคนถือสินค้า</label>
+                        <input type="file" name="product_images_behind" accept="image/*" capture="environment">
+
+                        <div style="margin-top:10px;">
+                            @if (!empty($sale->product_images_behind))
+                                <img src="{{ asset('storage/' . $sale->product_images_behind) }}"
+                                    style="width:80px; height:80px; object-fit:cover; border-radius:8px;">
+                            @else
+                                <span>ไม่มีรูป</span>
+                            @endif
+                        </div>
                     </div>
                     <div class="form-row">
                         <label>รูปภาพใบเสร็จ</label>
@@ -227,6 +260,17 @@
                         <div id="preview-bill" style="display:flex; gap:10px; margin-top:10px;">
                             @if (!empty($sale->bill))
                                 <img src="{{ asset('storage/' . $sale->bill) }}"
+                                    style="width:80px; height:80px; object-fit:cover; border-radius:8px;">
+                            @endif
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <label>ใบเสร็จหน้าร้าน</label>
+                        <input type="file" name="bill_QR_store" id="bill_QR_store-image" accept="image/*"
+                            capture="environment">
+                        <div id="preview-bill_QR_store" style="display:flex; gap:10px; margin-top:10px;">
+                            @if (!empty($sale->bill_QR_store))
+                                <img src="{{ asset('storage/' . $sale->bill_QR_store) }}"
                                     style="width:80px; height:80px; object-fit:cover; border-radius:8px;">
                             @endif
                         </div>

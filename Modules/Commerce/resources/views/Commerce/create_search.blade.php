@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ค้นหาประวัติ</title>
     <link rel="stylesheet" href="{{ asset('css/search.css') }}">
     <script src="{{ asset('js/app.js') }}"></script>
@@ -23,7 +23,52 @@
 </header>
 
 <body>
+    @if (auth()->user()->role_id == 3)
+        <nav>
+            <a href="{{ route('commerce.report_salefront') }}">
+                {{ request()->routeIs('commerce.report_salefront') ? '► ' : '' }}รายการรับจ่าย
+            </a> |
+
+            <a href="{{ route('commerce.sale_list') }}">
+                {{ request()->routeIs('commerce.sale_list') ? '► ' : '' }}รายการจำนำ
+            </a> |
+
+            <a href="{{ route('user.index') }}">
+                {{ request()->routeIs('user.*') ? '► ' : '' }}จัดการพนักงาน
+            </a> |
+
+            <a href="{{ route('commerce.show_member') }}">
+                {{ request()->routeIs('commerce.show_member') ? '► ' : '' }}รายชื่อลูกค้า
+
+            </a>|
+
+            <a href="{{ route('commerce.manage_dok') }}">
+                {{ request()->routeIs('commerce.manage_dok') ? '► ' : '' }}จัดการคอกเบี้ยต่อเดือน
+
+            </a>|
+
+            <a href="{{ route('commerce.running_no') }}">
+                {{ request()->routeIs('commerce.running_no') ? '► ' : '' }}จัดการเลขที่ตั๋ว
+                (ห้ามเปลี่ยนถ้าไม่จำเป็น)
+            </a> |
+        </nav>
+        <hr>
+    @endif
+
     <main class="page">
+        @if (auth()->user()->role_id == 1)
+            <nav>
+                <a href="{{ route('commerce.report_salefront') }}">
+                    {{ request()->routeIs('commerce.report_salefront') ? '► ' : '' }}รายการรับจ่าย
+                </a> |
+
+                <a href="{{ route('commerce.sale_list') }}">
+                    {{ request()->routeIs('commerce.sale_list') ? '► ' : '' }}รายการจำนำ
+                </a> |
+            </nav>
+            <hr>
+        @endif
+
         <h1 class="page-title">ค้นหาประวัติ</h1>
         <p class="page-subtitle">ค้นหาข้อมูลจากเบอร์โทรหรือหมายเลขเครื่อง</p>
 
@@ -60,6 +105,10 @@
                     🔍 ค้นหาประวัติ
                 </button>
         </form>
+        <a href="{{ route('commerce.create_salefront', $sale->id ?? null) }}">รายการขาย</a>
+        <button type="button" onclick="startScan()">📷 สแกน QR Code</button>
+
+        <div id="reader" style="width:300px; margin-top:10px;"></div>
 
 
         </div>
@@ -68,3 +117,33 @@
 </body>
 
 </html>
+
+<!-- โหลด library -->
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<!-- เขียนโค้ดของเรา -->
+<script>
+    function startScan() {
+        const html5QrCode = new Html5Qrcode("reader");
+
+        html5QrCode.start({
+                facingMode: "environment"
+            }, // กล้องหลัง
+            {
+                fps: 10,
+                qrbox: 250
+            },
+            (decodedText) => {
+                alert("QR Code: " + decodedText);
+
+                // ถ้าเป็น URL → ไปหน้าเลย
+                window.location.href = decodedText;
+
+                html5QrCode.stop();
+            },
+            (errorMessage) => {
+                // ignore
+            }
+        );
+    }
+</script>

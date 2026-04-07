@@ -42,12 +42,16 @@
             <!-- Card Header -->
             <div class="card-header">
                 <div class="header-left">
-                    <h2>ข้อมูล user</h2>
+                    <h2>ข้อมูลลูกค้า</h2>
                     <span class="subtitle">user</span>
                 </div>
 
                 @foreach ($member as $members)
-                    <a href="{{ route('commerce.create_pawning', $members->member_id) }}">
+                    <a href="{{ route('commerce.create_pawning', [
+                        'id' => $members->member_id,
+                        'mode' => 'edit',
+                    ]) }}"
+                        style="display:block; margin-bottom:5px;">
                         ดำเนินรายการ
                     </a>
                 @endforeach
@@ -93,6 +97,7 @@
                             <th>รหัสเครื่อง</th>
                             <th>ชื่อลูกค้า</th>
                             <th>ประเภทบริการ</th>
+                            <th>สถานะเครื่อง</th>
                         </tr>
                     </thead>
 
@@ -100,13 +105,12 @@
                         @foreach ($member as $item)
                             @forelse ($item->sales_r as $sale)
                                 <tr class="clickable-row"
-                                    onclick="window.location='{{ route('commerce.show_sale', $sale->id) }}'">
-
+                                    onclick="window.location='{{ route('commerce.show_sale', ['id' => $sale->id, 'mode' => 'view']) }}'">
                                     <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $sale->id }}</td>
+                                    <td>{{ $sale->running_no }}</td>
 
                                     @if ($hasBrandModel)
-                                        <td>{{ $sale->brand }}</td>
+                                        <td>{{ $sale->brand ?? ($sale->other_brand ?? 'ไม่ระบุ') }}</td>
                                         <td>{{ $sale->model }}</td>
                                     @else
                                         <td>{{ $sale->other_type }} </td>
@@ -120,6 +124,18 @@
                                         @else
                                             ขาย
                                         @endif
+                                    </td>
+                                    <td>
+                                        @php
+                                            $statusMap = [
+                                                'between' => 'จำนำ',
+                                                'foreclosed' => 'หลุด',
+                                                'problem' => 'มีปัญหา',
+                                                'closed' => 'ปิดรายการ',
+                                                'fall' => 'หลุด',
+                                            ];
+                                        @endphp
+                                        {{ $statusMap[trim($sale->status)] ?? '-' }}
                                     </td>
                                 </tr>
                             @empty
