@@ -151,7 +151,7 @@ class CommerceController extends Controller
             'note'               => 'nullable|string',
             'appointment_date' => 'required|date|after_or_equal:today',
             'product_images'   => 'nullable|image|mimes:jpg,jpeg,png|max:3000',
-            'bill_QR_store'    => 'nullable|image|mimes:jpg,jpeg,png|max:3000',
+            // 'bill_QR_store'    => 'nullable|image|mimes:jpg,jpeg,png|max:3000',
             'bill'               => 'nullable|image|mimes:jpg,jpeg,png|max:3000',
         ], [
 
@@ -209,94 +209,45 @@ class CommerceController extends Controller
                 ->withInput();
         }
 
-        Member::findOrFail($id);
+        // Member::findOrFail($id);
         $member_id = DB::transaction(function () use ($request, $cash, $transfer, $principal, $id) {
 
+            // =========================
+            // RUNNING NO (LOCK SAFE)
+            // =========================
+            $settings = Settings::where('id', 1)
+                ->lockForUpdate()
+                ->first();
+
+            $next = ($settings->running_no ?? 900000) + 1;
+
+            $settings->update([
+                'running_no' => $next
+            ]);
+
+            // =========================
+            // CREATE SALE
+            // =========================
             $sale = new Sale();
-            // =========================
-            // กำหนดค่า
-            // =========================
-            $sale->member_id       = $id;
-            $sale->type_category   = $request->type_category;
-            $sale->brand           = $request->brand;
-            $sale->model           = $request->model;
-            $sale->serial_number   = $request->serial_number;
-            $sale->cash            = $cash;
-            $sale->transfer        = $transfer;
-            $sale->note            = $request->note;
+            $sale->member_id        = $id;
+            $sale->type_category    = $request->type_category;
+            $sale->brand            = $request->brand;
+            $sale->model            = $request->model;
+            $sale->serial_number    = $request->serial_number;
+            $sale->cash             = $cash;
+            $sale->transfer         = $transfer;
+            $sale->note             = $request->note;
             $sale->appointment_date = $request->appointment_date;
-            $sale->user_id         = auth()->user()->user_id;
-
-            // =========================
-            // running number (LOCK)
-            // =========================
-            $last = Sale::lockForUpdate()->orderBy('running_no', 'desc')->first();
-            $sale->running_no = $request->running_no
-                ?? ($last ? $last->running_no + 1 : 900000);
-            // =========================
-            // Save Sale + สร้าง QR
-            // =========================
+            $sale->user_id          = auth()->user()->user_id;
+            $sale->running_no       = $next;
 
             $sale->save();
 
-
-            $url = route('commerce.show_sale', $sale->id);
-            $qrCode = QrCode::create($url)->setSize(300)->setMargin(10);
-            $writer = new SvgWriter();
-            $result = $writer->write($qrCode);
-            $qrPath = 'qrcodes/create_pawning_' . $sale->id . '.svg';
-            Storage::disk('public')->put($qrPath, $result->getString());
-            $sale->qr_code = $qrPath;
-            $sale->save();
-
             // =========================
-            // อัปเดต member
+            // MEMBER UPDATE
             // =========================
-            Member::where('member_id', $id)->update(['sale_id' => $sale->id]);
-
-            // =========================
-            // upload
-            // =========================
-
-
-            if ($request->hasFile('product_images')) {
-                $sale->product_images = $request->file('product_images')->store('products', 'public');
-            }
-
-            if ($request->hasFile('product_images_behind')) {
-                $sale->product_images_behind = $request->file('product_images_behind')->store('products', 'public');
-            }
-
-            if ($request->hasFile('bill')) {
-                $sale->bill = $request->file('bill')->store('bills', 'public');
-            }
-
-            if ($request->hasFile('bill_QR_store')) {
-                $sale->bill_qr_store = $request->file('bill_QR_store')->store('bill_qr_store', 'public');
-            }
-
-            // =========================
-            // ดอกเบี้ย
-            // =========================
-            $sale->dok = 0;
-
-            if ($request->appointment_date) {
-                $days = now()->diffInDays(Carbon::parse($request->appointment_date));
-
-                $interestRate = Interest::where('days', '>=', $days)
-                    ->orderBy('days', 'asc')
-                    ->first() ?? Interest::orderBy('days', 'desc')->first();
-
-                if ($interestRate) {
-                    $sale->dok = ($principal * $interestRate->percent) / 100;
-                }
-            }
-
-            // =========================
-            // save
-            // =========================
-            $sale->save();
-
+            Member::where('member_id', $id)
+                ->update(['sale_id' => $sale->id]);
 
             $slipPath = $request->hasFile('slip')
                 ? $request->file('slip')->store('slips', 'public')
@@ -310,13 +261,59 @@ class CommerceController extends Controller
             $expenses->transfer = $transfer;
             $expenses->type = 'pay';
             $expenses->slip = $slipPath;
-            $expenses->sale_id = $id;
+            $expenses->sale_id = $sale->id;
             $expenses->user_id = auth()->user()->user_id;
             $expenses->save();
-
-            return $sale->id; // 🔥 ต้องมี
+            return $sale->id;
         });
+        $sale = Sale::findOrFail($member_id);
 
+        // QR
+        $url = route('commerce.show_sale', $sale->id);
+
+        $qrCode = QrCode::create($url)->setSize(300)->setMargin(10);
+        $writer = new SvgWriter();
+        $result = $writer->write($qrCode);
+
+        $qrPath = 'qrcodes/create_pawning_' . $sale->id . '.svg';
+
+        Storage::disk('public')->put($qrPath, $result->getString());
+
+        // prepare update data
+        $data = [
+            'qr_code' => $qrPath,
+            'dok' => 0,
+        ];
+
+        // files
+        if ($request->hasFile('product_images')) {
+            $data['product_images'] = $request->file('product_images')->store('products', 'public');
+        }
+
+        if ($request->hasFile('product_images_behind')) {
+            $data['product_images_behind'] = $request->file('product_images_behind')->store('products', 'public');
+        }
+
+        if ($request->hasFile('bill')) {
+            $data['bill'] = $request->file('bill')->store('bills', 'public');
+        }
+
+        // interest
+        if ($request->appointment_date) {
+            $days = now()->diffInDays(Carbon::parse($request->appointment_date));
+
+            $interestRate = Interest::where('days', '>=', $days)
+                ->orderBy('days', 'asc')
+                ->first()
+                ?? Interest::orderBy('days', 'desc')->first();
+
+            if ($interestRate) {
+                $data['dok'] = ($principal * $interestRate->percent) / 100;
+            }
+        }
+
+        // FINAL SAVE (ครั้งเดียว)
+        $sale->update($data);
         return redirect()->route('commerce.create_search', [
             'member_id' => $member_id,
             'success'   => 'บันทึกข้อมูลเรียบร้อย'
@@ -578,12 +575,10 @@ class CommerceController extends Controller
             'added_by_image' => 'image|max:2048',
         ]);
 
-        $originalSale = Sale::findOrFail($id);
-
         $cash     = (float) $request->cash;
         $transfer = (float) $request->transfer;
 
-        DB::transaction(function () use ($request, $originalSale, $cash, $transfer, $id) {
+        DB::transaction(function () use ($request, $cash, $transfer, $id) {
 
             $slipPath = $request->hasFile('slip')
                 ? $request->file('slip')->store('slips', 'public')
@@ -748,36 +743,32 @@ class CommerceController extends Controller
     // PDFFFFF
     public function reportsalefrontPdf(Request $request)
     {
-        $start = $request->start_date;
-        $end = $request->end_date;
-
         $query = Expenses::query()
-            ->when($start, fn($q) =>
-            $q->whereDate('created_at', '>=', $start))
-            ->when($end, fn($q) =>
-            $q->whereDate('created_at', '<=', $end));
+            ->when($request->filled('status'), function ($q) use ($request) {
+                $q->where('type', $request->status);
+            })
+            ->when($request->filled('search'), function ($q) use ($request) {
+                $q->where('product', 'like', "%{$request->search}%");
+            });
 
-        $totals = (clone $query)
-            ->selectRaw("
-            SUM(CASE WHEN type = 'receive'
-                THEN COALESCE(cash,0) + COALESCE(transfer,0)
-                ELSE 0 END) as total_receive,
-            SUM(CASE WHEN type = 'pay'
-                THEN COALESCE(cash,0) + COALESCE(transfer,0)
-                ELSE 0 END) as total_pay
-        ")
-            ->first();
-
-        $totalReceive = $totals->total_receive ?? 0;
-        $totalPay = $totals->total_pay ?? 0;
-        $balance = $totalReceive - $totalPay;
-
-        $expenses = (clone $query)
-            ->with('user')
+        $expenses = $query->with('user')
             ->latest()
             ->get();
 
-        $pdf = Pdf::loadView('commerce::commerce.report_sale_pdf', compact(
+        $totalReceive = $expenses->where('type', 'receive')->sum(function ($item) {
+            return $item->cash + $item->transfer;
+        });
+
+        $totalPay = $expenses->where('type', 'pay')->sum(function ($item) {
+            return $item->cash + $item->transfer;
+        });
+
+        $balance = $totalReceive - $totalPay;
+
+        $start = $request->start ?? null;
+        $end = $request->end ?? null;
+
+        $pdf = Pdf::loadView('commerce::commerce.sale_list_PDF', compact(
             'expenses',
             'totalReceive',
             'totalPay',
@@ -786,7 +777,7 @@ class CommerceController extends Controller
             'end'
         ))->setPaper('a4', 'portrait');
 
-        return $pdf->stream('report_sale_pdf.pdf');
+        return $pdf->stream('report_sale.pdf');
     }
 
     public function detil_sale($id)
@@ -867,7 +858,7 @@ class CommerceController extends Controller
         $start = $request->start ?? null;
         $end = $request->end ?? null;
 
-        $pdf = Pdf::loadView('commerce::commerce.report_sale_pdf', compact(
+        $pdf = Pdf::loadView('commerce::commerce.sale_list_PDF', compact(
             'expenses',
             'totalReceive',
             'totalPay',

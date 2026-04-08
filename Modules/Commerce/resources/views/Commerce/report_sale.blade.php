@@ -247,7 +247,7 @@
                                 @endif
                             </td>
                             <td>{{ $e->created_at->format('d/m/Y') }}</td>
-                            <td>{{ $e->user->name ?? '-' }}</td>
+                            <td>{{ $e->user_r->name ?? '-' }}</td>
                             <td>{{ $e->sale_r->note_dok ?? '-' }}</td>
                             <td>{{ $e->note ?? '-' }}</td>
                         </tr>

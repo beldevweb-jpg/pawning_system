@@ -66,7 +66,6 @@
                 <th>ลูกค้า</th>
                 <th>วันที่ทำรายการ</th>
                 <th>ครบกำหนด</th>
-                <th>วันที่</th>
                 <th>ผู้บันทึก</th>
             </tr>
         </thead>
@@ -77,10 +76,11 @@
                     <td>{{ number_format($e->cash, 2) }}</td>
                     <td>{{ number_format($e->transfer, 2) }}</td>
                     <td>
-                        {{ $e->member_r->fullname ?? '-' }}
+                        {{ $e->sale_r->member_r->fullname ?? '-' }}
                     </td>
                     <td>{{ $e->created_at->format('d/m/Y') }}</td>
-                    <td>{{ $e->user->name ?? '-' }}</td>
+                    <td>{{ $e->sale_r?->appointment_date?->format('d/m/Y') ?? '-' }}</td>
+                    <td>{{ $e->sale_r->user_r->name ?? '-' }}</td>
                 </tr>
             @endforeach
         </tbody>

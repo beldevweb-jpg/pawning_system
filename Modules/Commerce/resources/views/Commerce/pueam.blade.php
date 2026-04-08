@@ -37,7 +37,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('commerce.pueam_store', $sale->id) }}" enctype="multipart/form-data">
+        <form method="POST" action="{{ route('commerce.store_pueam', $sale->id) }}" enctype="multipart/form-data">
             @csrf
 
             <div class="card">

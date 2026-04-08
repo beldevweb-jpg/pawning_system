@@ -38,7 +38,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     route::get('/pueam/{id?}', [CommerceController::class, 'pueam'])->name('commerce.pueam');
     route::post('/pueam/store/{id?}', [CommerceController::class, 'store_pueam'])
-        ->name('commerce.pueam_store');
+        ->name('commerce.store_pueam');
 
     route::get('/create_salefront/{id?}', [CommerceController::class, 'create_salefront'])->name('commerce.create_salefront');
     Route::post('/salefront/store', [CommerceController::class, 'store_salefront'])
@@ -54,13 +54,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     route::get('/slip/{id}', [CommerceController::class, 'slip'])->name('commerce.slip');
 
     route::get('/detil_sale/{id}', [CommerceController::class, 'detil_sale'])->name('commerce.detil_sale');
+
+
     Route::get(
-        '/report-salefront-pdf',
+        '/report_sale_pdf',
         [CommerceController::class, 'reportsalefrontPdf']
     )->name('commerce.report_sale_pdf');
 
     Route::get('/sale-list-pdf', [CommerceController::class, 'saleListPdf'])
         ->name('commerce.sale_list_pdf');
+
+
 
     route::get('/show_member', [CommerceController::class, 'show_member'])->name('commerce.show_member');
 
@@ -78,4 +82,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('/settings/save/{id?}', [CommerceController::class, 'save_settings'])
         ->name('commerce.save_settings');
+
+    Route::get('/running_no/form/{id?}', [CommerceController::class, 'running_no'])
+        ->name('commerce.running_no');
+
+    Route::post('/running_no/save/{id?}', [CommerceController::class, 'stor_running_no'])
+        ->name('commerce.stor_running_no');
 });

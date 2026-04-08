@@ -264,7 +264,7 @@
                             @endif
                         </div>
                     </div>
-                    <div class="form-row">
+                    {{-- <div class="form-row">
                         <label>ใบเสร็จหน้าร้าน</label>
                         <input type="file" name="bill_QR_store" id="bill_QR_store-image" accept="image/*"
                             capture="environment">
@@ -274,7 +274,7 @@
                                     style="width:80px; height:80px; object-fit:cover; border-radius:8px;">
                             @endif
                         </div>
-                    </div>
+                    </div> --}}
                 </div>
                 @if (!$isView)
                     <div class="submit">

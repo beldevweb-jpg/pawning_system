@@ -148,10 +148,10 @@
                                 <td>
                                     {{ match ($sale->status) {
                                         'between' => 'จำนำอยู่',
-                                        'fall' => 'หลุด',
+                                        'foreclosed' => 'หลุด',
                                         'problem' => 'มีปัญหา',
                                         'closed' => 'ปิดรายการ',
-                                        'bad' => 'ไม่รับ',
+                                        'fall' => 'ไม่รับ',
                                         default => 'ปกติ',
                                     } }}
                                 </td>

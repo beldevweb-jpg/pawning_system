@@ -4,9 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        body {
-            font-family: DejaVu Sans, sans-serif;
-            font-size: 14px;
+        @font-face {
+            font-family: 'THSarabunNew';
+            font-style: normal;
+            font-weight: normal;
+            src: url("{{ public_path('font/THSarabunNew.ttf') }}") format("truetype");
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .summary {
+            margin-bottom: 15px;
         }
 
         table {
@@ -16,13 +27,23 @@
 
         th,
         td {
-            border: 1px solid #000;
+            border: none;
             padding: 6px;
-            text-align: left;
+            text-align: center;
         }
 
         th {
             background: #eee;
+        }
+
+        .green {
+            color: green;
+            font-weight: bold;
+        }
+
+        .red {
+            color: red;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -45,21 +66,25 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($sales as $i => $sale)
+            @foreach ($expenses as $i => $e)
                 <tr>
                     <td>{{ $i + 1 }}</td>
-                    <td>{{ $sale->running_no }}</td>
-                    <td>{{ $sale->brand }} {{ $sale->model }}</td>
-                    <td>{{ $sale->user_r->name ?? '-' }}</td>
-                    <td>{{ $sale->member_r->fullname ?? '-' }}</td>
-                    <td>{{ $sale->created_at->format('d/m/Y') }}</td>
-                    <td>{{ optional($sale->appointment_date)->format('d/m/Y') }}</td>
+                    <td>{{ $e->sale_r->running_no ?? '-' }}</td>
+                    <td>{{ $e->product }}</td>
+                    <td>{{ $e->sale_r->user_r->name ?? '-' }}</td>
+
                     <td>
-                        {{ match ($sale->status) {
+                        {{ $e->sale_r->member_r->fullname ?? '-' }}
+                    </td>
+                    <td>{{ $e->created_at->format('d/m/Y') }}</td>
+                    <td>{{ $e->sale_r?->appointment_date?->format('d/m/Y') ?? '-' }}</td>
+                    <td>
+                        {{ match ($e->sale_r->status) {
                             'between' => 'จำนำอยู่',
-                            'fall' => 'หลุด',
+                            'foreclosed' => 'หลุด',
                             'problem' => 'มีปัญหา',
                             'closed' => 'ปิดรายการ',
+                            'fall' => 'ไม่รับ',
                             default => 'ปกติ',
                         } }}
                     </td>

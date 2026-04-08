@@ -6,7 +6,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-// use 
+// use Modules\Commerce\Models\Expenses;
+use Modules\Commerce\Models\Sale;
 
 class User extends Authenticatable
 {
@@ -57,8 +58,8 @@ class User extends Authenticatable
         return 'username';
     }
 
-    public function expenses()
+    public function sale_r()
     {
-        return $this->hasMany(Expenses::class, 'user_id', 'user_id');
+        return $this->hasMany(Sale::class, 'user_id', 'user_id');
     }
 }

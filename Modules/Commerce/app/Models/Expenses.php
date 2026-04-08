@@ -38,6 +38,11 @@ class Expenses extends Model
         return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
+    public function sale_r()
+    {
+        return $this->belongsTo(Sale::class, 'sale_id', 'id');
+    }
+
     // protected static function newFactory(): ExpensesFactory
 
     // {
