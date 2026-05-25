@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\User;
 
 use Modules\Members\Models\Member;
+use Modules\Commerce\Models\Expense;
 
 
 
@@ -66,7 +67,7 @@ class Sale extends Model
         'qr_code',
         'appointment_date',
     ];
-    
+
     public function user_r()
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
@@ -75,6 +76,11 @@ class Sale extends Model
     public function member_r(): BelongsTo
     {
         return $this->belongsTo(Member::class, 'member_id', 'member_id');
+    }
+
+    public function expenses(): HasMany
+    {
+        return $this->hasMany(Expense::class, 'sale_id', 'id');
     }
 
 

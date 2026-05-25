@@ -57,12 +57,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
     Route::get(
-        '/report_sale_pdf',
+        '/report_sale',
         [CommerceController::class, 'reportsalefrontPdf']
     )->name('commerce.report_sale_pdf');
 
     Route::get('/sale-list-pdf', [CommerceController::class, 'saleListPdf'])
-        ->name('commerce.sale_list_pdf');
+        ->name('commerce.saleListPdf');
 
 
 
@@ -88,4 +88,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('/running_no/save/{id?}', [CommerceController::class, 'stor_running_no'])
         ->name('commerce.stor_running_no');
+
+    route::get('/closeDay', [CommerceController::class, 'closeDay'])->name('commerce.closeDay');
+
+    Route::get('/commerce/report-pdf/{id}', [CommerceController::class, 'daily_report_exportpdf'])->name('commerce.daily_report_exportpdf');
+
+    Route::get('/commerce/report-preview/{id}', [CommerceController::class, 'daily_report_preview'])->name('commerce.daily_report_preview');
+
+    Route::get(
+        '/sale-list-excel',
+        [CommerceController::class, 'saleListExcel']
+    )->name('sale-list-excel');
+
+    Route::get(
+        '/report-sale-excel',
+        [CommerceController::class, 'reportSaleExcel']
+    )->name('commerce.reportSaleExcel');
 });

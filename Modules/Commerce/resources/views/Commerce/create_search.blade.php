@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ค้นหาประวัติ</title>
     <link rel="stylesheet" href="{{ asset('css/search.css') }}">
-    <script src="{{ asset('js/app.js') }}"></script>
 </head>
 
 <header style="display:flex;justify-content:space-between;padding:15px;">
@@ -106,7 +105,6 @@
                 </button>
         </form>
         <a href="{{ route('commerce.create_salefront', $sale->id ?? null) }}">รายการขาย</a>
-        <button type="button" onclick="startScan()">📷 สแกน QR Code</button>
 
         <div id="reader" style="width:300px; margin-top:10px;"></div>
 
@@ -117,33 +115,69 @@
 </body>
 
 </html>
+<button type="button" onclick="startScan()">
+    📷 สแกน QR Code
+</button>
+
+<br><br>
+
+<div id="reader" style="width:300px;"></div>
 
 <!-- โหลด library -->
 <script src="https://unpkg.com/html5-qrcode"></script>
 
-<!-- เขียนโค้ดของเรา -->
 <script>
+
+    
+    let html5QrCode;
+
     function startScan() {
-        const html5QrCode = new Html5Qrcode("reader");
+
+        // กันกดซ้ำ
+        if (html5QrCode) {
+            return;
+        }
+
+        html5QrCode = new Html5Qrcode("reader");
 
         html5QrCode.start({
                 facingMode: "environment"
-            }, // กล้องหลัง
-            {
+            }, {
                 fps: 10,
                 qrbox: 250
             },
-            (decodedText) => {
-                alert("QR Code: " + decodedText);
 
-                // ถ้าเป็น URL → ไปหน้าเลย
-                window.location.href = decodedText;
+            function(decodedText) {
 
-                html5QrCode.stop();
+                alert("QR Code : " + decodedText);
+
+                html5QrCode.stop().then(() => {
+                    html5QrCode = null;
+                });
+
+                // ถ้าเป็น URL
+                if (
+                    decodedText.startsWith("http://") ||
+                    decodedText.startsWith("https://")
+                ) {
+                    window.location.href = decodedText;
+                }
+
             },
-            (errorMessage) => {
+
+            function(errorMessage) {
                 // ignore
             }
-        );
+
+        ).catch(err => {
+
+            console.log(err);
+
+            alert("เปิดกล้องไม่ได้ : " + err);
+
+            html5QrCode = null;
+
+        });
+
     }
 </script>

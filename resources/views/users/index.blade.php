@@ -75,7 +75,7 @@
             <!-- Card Header -->
             <div class="page-header">
                 <div class="header-left">
-                    <h2>ข้อมูล user</h2>
+                    <h2>ข้อมูล พนักงาน</h2>
                     <span class="subtitle">member</span>
                 </div>
 

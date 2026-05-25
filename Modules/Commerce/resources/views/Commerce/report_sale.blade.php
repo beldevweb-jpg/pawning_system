@@ -5,11 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>แสดงรายรับรายจ่าย</title>
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+
+    <link rel="stylesheet" href="{{ asset('css/daily-report.css') }}">
     <link rel="stylesheet" href="{{ asset('css/table.css') }}">
     <style>
         * {
             box-sizing: border-box;
-            font-family: sans-serif;
         }
 
         body {
@@ -148,6 +152,16 @@
     </header>
 
     <div class="container">
+        @if (auth()->user()->role_id == 1)
+            <nav>
+                <a href="{{ route('commerce.report_salefront') }}">
+                    {{ request()->routeIs('commerce.report_salefront') ? '► ' : '' }}รายการรับจ่าย
+                </a> |
+                <a href="{{ route('commerce.sale_list') }}">
+                    {{ request()->routeIs('commerce.sale_list') ? '► ' : '' }}รายการจำนำ
+                </a>
+            </nav>
+        @endif
         @if (auth()->user()->role_id == 3)
             <nav>
                 <a href="{{ route('commerce.report_salefront') }}">
@@ -215,9 +229,38 @@
 
             <a href="{{ route('commerce.report_sale_pdf', request()->query()) }}" target="_blank"
                 style="display:inline-block;margin-bottom:10px;background:black;color:white;padding:8px 12px;border-radius:6px;text-decoration:none">
-                Export PDF
+                Export PDF แบบกำหนดเอง
             </a>
+            <a href="{{ route('sale-list-excel', request()->query()) }}" class="btn btn-success">
+                Export Excel
+            </a>
+            <!-- ส่วนแสดงข้อความ Success -->
+            @if (session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i> <!-- ใส่ไอคอนเพื่อความสวยงาม -->
+                    <strong>สำเร็จ!</strong> {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
 
+            <!-- ส่วนแสดงข้อความ Error จาก Session -->
+            @if (session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> <!-- ใส่ไอคอนเพื่อความสวยงาม -->
+                    <strong>ผิดพลาด!</strong> {{ session('error') }}
+                </div>
+            @endif
+
+            @if ($errors->any())
+                <div class="alert-box alert-warning">
+                    <strong>[คำเตือน] กรุณาตรวจสอบ:</strong>
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
             <table>
                 <thead>
                     <tr>
@@ -278,11 +321,26 @@
                         </td>
                     </tr>
                 </tfoot>
+
             </table>
-
+            <div class="pagination-wrapper">
+                {{ $expenses->links() }}
+            </div>
+            </a>
         </div>
-
+        <br>
+        <a href="{{ route('commerce.closeDay') }}"
+            onclick="return confirm('ยืนยันการปิดยอดรายวัน? เมื่อปิดแล้วจะไม่สามารถแก้ไขรายการของวันนี้ได้')"
+            style="display:inline-block;margin-bottom:10px;background:rgb(255, 0, 0);color:rgb(255, 254, 254);padding:8px 12px;border-radius:6px;text-decoration:none">
+            ปิดยอดประจำวัน
+        </a>
+        @if ($report)
+            <a href="{{ route('commerce.daily_report_preview', '1') }}" class="btn-preview"
+                style="display:inline-block;margin-bottom:10px;background:rgb(255, 0, 0);color:rgb(255, 254, 254);padding:8px 12px;border-radius:6px;text-decoration:none">
+                ดูรายละเอียด
+            </a>
     </div>
+    @endif
 
 </body>
 

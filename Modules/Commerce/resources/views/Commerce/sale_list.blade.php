@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ประวัติการขาย</title>
     <link rel="stylesheet" href="{{ asset('css/table.css') }}">
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
 <body>
@@ -22,6 +24,16 @@
         </form>
     </header>
     <div class="container" style="max-width:1500px;margin:auto">
+        @if (auth()->user()->role_id == 1)
+            <nav>
+                <a href="{{ route('commerce.report_salefront') }}">
+                    {{ request()->routeIs('commerce.report_salefront') ? '► ' : '' }}รายการรับจ่าย
+                </a> |
+                <a href="{{ route('commerce.sale_list') }}">
+                    {{ request()->routeIs('commerce.sale_list') ? '► ' : '' }}รายการจำนำ
+                </a>
+            </nav>
+        @endif
         @if (auth()->user()->role_id == 3)
             <nav>
                 <a href="{{ route('commerce.report_salefront') }}">
@@ -54,40 +66,78 @@
         @endif
 
         <div class="card">
+            <h1 style="margin-bottom:20px;">ประวัติการขาย</h1>
+            <form method="GET" action="{{ route('commerce.sale_list') }}" class="filter">
+                <input type="text" name="search" class="search-box" placeholder="ค้นหา..."
+                    value="{{ request('search') }}">
+                <div class="date-group">
+                    <label>สถานะ</label>
 
-            <div class="page-header">
-                <div class="header-left">
-                    <h2>ประวัติการขาย</h2>
-                    <span class="subtitle">User Management</span>
+                    <select name="status">
+
+                        <option value="">
+                            ทั้งหมด
+                        </option>
+
+                        <option value="between" {{ request('status') == 'between' ? 'selected' : '' }}>
+                            อยู่ระหว่างจำนำ
+                        </option>
+
+                        <option value="closed" {{ request('status') == 'closed' ? 'selected' : '' }}>
+                            ไถ่ถอนแล้ว
+                        </option>
+
+                        <option value="fall" {{ request('status') == 'fall' ? 'selected' : '' }}>
+                            หลุดจำนำ
+                        </option>
+
+                    </select>
                 </div>
 
-                <div class="header-right">
-                    <input type="text" class="search-box" placeholder="ค้นหา..." />
+                <div class="date-group">
+                    <label>วันเริ่ม</label>
+
+                    <input type="date" name="start_date" value="{{ request('start_date') }}">
                 </div>
-            </div>
-            <form method="GET" action="">
-                <select name="status">
-                    <option value="">สถานะทั้งหมด</option>
-                    <option value="between">จำนำอยู่</option>
-                    <option value="fall">หลุด</option>
-                    <option value="problem">มีปัญหา</option>
-                    <option value="closed">ปิดรายการ</option>
-                    <option value="bad">ไม่รับ</option>
-                </select>
 
-                <input type="text" name="search" placeholder="ค้นหา...">
+                <div class="date-group">
+                    <label>วันสิ้นสุด</label>
 
-                <button type="submit">ค้นหา</button>
+                    <input type="date" name="end_date" value="{{ request('end_date') }}">
+                </div>
+
+                <button type="submit">
+                    ค้นหา
+                </button>
+
+                <a href="{{ route('commerce.sale_list') }}">
+                    <button type="button">
+                        รีเซ็ต
+                    </button>
+                </a>
+
             </form>
+
             @php
                 $showFallColumn = $sales->where('status', '!=', 'fall')->count() > 0;
             @endphp
 
             <div class="table-wrapper">
-                <a href="{{ route('commerce.sale_list_pdf', request()->all()) }}" target="_blank">
+                <a href="{{ route('commerce.saleListPdf', request()->query()) }}" target="_blank"
+                    style="display:inline-block;margin-bottom:10px;background:black;color:white;padding:8px 12px;border-radius:6px;text-decoration:none">
+
                     📄 Export PDF
+
                 </a>
+
+                <a href="{{ route('commerce.reportSaleExcel', request()->query()) }}" class="btn btn-success">
+
+                    Export Excel
+
+                </a>
+
                 <table class="table">
+
                     <thead>
                         <tr>
                             <th>ลำดับ</th>
@@ -100,6 +150,7 @@
 
                             @if (auth()->user()->role_id == 3)
                                 <th>แก้ไข</th>
+
                                 @if ($showFallColumn)
                                     <th>หลุดจำนำ</th>
                                 @endif
@@ -118,7 +169,8 @@
                                 <td>{{ $sales->firstItem() + $loop->index }}</td>
                                 <td>{{ $sale->running_no }}</td>
 
-                                <td>{{ $sale->brand ?? '-' }} {{ $sale->model ?? '-' }}</td>
+                                <td>{{ $sale->brand ?? '' }} {{ $sale->model ?? '' }} {{ $sale->other_type ?? '' }}
+                                </td>
 
                                 <td>{{ $sale->user_r->name ?? '-' }}</td>
 
@@ -148,10 +200,10 @@
                                 <td>
                                     {{ match ($sale->status) {
                                         'between' => 'จำนำอยู่',
-                                        'foreclosed' => 'หลุด',
+                                        'fall' => 'หลุด',
                                         'problem' => 'มีปัญหา',
                                         'closed' => 'ปิดรายการ',
-                                        'fall' => 'ไม่รับ',
+                                        'bad' => 'ไม่รับ',
                                         default => 'ปกติ',
                                     } }}
                                 </td>
@@ -176,4 +228,5 @@
 
 
 </body>
+
 </html>

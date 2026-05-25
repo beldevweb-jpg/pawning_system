@@ -3,19 +3,23 @@
 namespace Modules\Commerce\Http\Controllers;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Validator;
+use Modules\Commerce\Exports\ReportSaleMultiExport;
+use Modules\Commerce\Exports\SalefontExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Modules\Commerce\Models\Settings;
 use Modules\Commerce\Models\Sale;
-use Modules\Members\Models\Member;
 use Modules\Commerce\Models\Expenses;
+use Modules\Commerce\Models\interest;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\SvgWriter;
 use Illuminate\Support\Facades\Storage;
-use Modules\Commerce\Models\interest;
-use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Modules\Commerce\Models\DailyReport;
+use Modules\Members\Models\Member;
+use Carbon\Carbon;
 
 
 
@@ -115,28 +119,22 @@ class CommerceController extends Controller
     public function create_pawning($id)
     {
         $mode = request('mode');
-
         if (!in_array($mode, ['view', 'edit'])) {
             $mode = 'view';
         }
-        // dd($id);
         $sale = Sale::find($id) ?? new Sale();
 
         $sale_between = Sale::where('status', 'between')->first();
-        // dd($sale_between);
         if (Member::where('member_id', $id)->exists()) {
             $member = Member::where('member_id', $id)->first();
         } else {
             $member = Member::where('sale_id', $id)->first();
         }
-        // dd($sale, $member, $sale_between);
         return view('commerce::commerce.create_pawning', compact('sale', 'member', 'sale_between'));
     }
 
     public function store_pawning(Request $request, $id = null)
     {
-        // dd($request);
-
         $request->validate([
             'type_category'      => 'required|string',
             'action_type'        => 'required_if:sale_between,1',
@@ -145,15 +143,26 @@ class CommerceController extends Controller
             'model'              => 'nullable|string',
             'locker_pass'        => 'nullable|string',
             'drawn_lock'         => 'nullable|string',
-            'serial_number'      => 'required|string',
+            'serial_number' => 'required|string|unique:sales,serial_number',
             'cash'               => 'nullable|numeric|min:0',
             'transfer'           => 'nullable|numeric|min:0',
             'note'               => 'nullable|string',
             'appointment_date' => 'required|date|after_or_equal:today',
             'product_images'   => 'nullable|image|mimes:jpg,jpeg,png|max:3000',
-            // 'bill_QR_store'    => 'nullable|image|mimes:jpg,jpeg,png|max:3000',
             'bill'               => 'nullable|image|mimes:jpg,jpeg,png|max:3000',
+            'product_images_behind' => 'nullable|array|max:10',
+            'product_images_behind.*' => 'image|mimes:jpg,jpeg,png,webp|max:3000',
         ], [
+
+            'product_images_behind.array' => 'รูปภาพต้องเป็นชุดข้อมูล',
+            'product_images_behind.max' => 'อัปโหลดได้ไม่เกิน 10 รูป',
+
+            'product_images_behind.*.image' => 'ไฟล์ต้องเป็นรูปภาพ',
+            'product_images_behind.*.mimes' => 'รองรับเฉพาะ jpg jpeg png webp',
+            'product_images_behind.*.max' => 'ขนาดรูปต้องไม่เกิน 3MB',
+
+            'product_images_behind' => 'nullable|array|max:10',
+            'product_images_behind.*' => 'image|mimes:jpg,jpeg,png,webp|max:3000',
 
             // type
             'type_category.required' => 'กรุณาเลือกประเภทสินค้า',
@@ -173,6 +182,7 @@ class CommerceController extends Controller
             // serial
             'serial_number.required' => 'กรุณากรอก IMEI / รหัสเครื่อง',
             'serial_number.string' => 'รหัสเครื่องต้องเป็นข้อความ',
+            'serial_number.unique' => 'IMEI / รหัสเครื่องนี้มีอยู่ในระบบแล้ว',
 
             // payment
             'cash.numeric' => 'เงินสดต้องเป็นตัวเลข',
@@ -229,8 +239,10 @@ class CommerceController extends Controller
             // CREATE SALE
             // =========================
             $sale = new Sale();
+            $sale->type_category     = $request->type_category;
+            $sale->status           = $request->status;
             $sale->member_id        = $id;
-            $sale->type_category    = $request->type_category;
+            $sale->other_type    = $request->other_type;
             $sale->brand            = $request->brand;
             $sale->model            = $request->model;
             $sale->serial_number    = $request->serial_number;
@@ -253,9 +265,14 @@ class CommerceController extends Controller
                 ? $request->file('slip')->store('slips', 'public')
                 : null;
 
+            // dd($request);
             $expenses = new Expenses();
             $expenses->user_id = auth()->user()->user_id;
-            $product = "จำ {$sale->brand} {$sale->model}";
+            if ($other_type = $request->other_type) {
+                $product = "จำ {$other_type}";
+            } else {
+                $product = "จำ {$sale->brand} {$sale->model}";
+            }
             $expenses->product = $product;
             $expenses->cash = $cash;
             $expenses->transfer = $transfer;
@@ -291,7 +308,17 @@ class CommerceController extends Controller
         }
 
         if ($request->hasFile('product_images_behind')) {
-            $data['product_images_behind'] = $request->file('product_images_behind')->store('products', 'public');
+
+            $images = [];
+
+            foreach ($request->file('product_images_behind') as $file) {
+
+                $path = $file->store('products', 'public');
+
+                $images[] = $path;
+            }
+
+            $data['product_images_behind'] = json_encode($images);
         }
 
         if ($request->hasFile('bill')) {
@@ -698,7 +725,6 @@ class CommerceController extends Controller
             ->when($end, fn($q) =>
             $q->whereDate('created_at', '<=', $end));
 
-        // ✅ รวม query เดียว (เร็วขึ้น)
         $totals = (clone $query)
             ->selectRaw('
             type,
@@ -721,23 +747,33 @@ class CommerceController extends Controller
             }
         }
 
-        // ✅ เพิ่มอันนี้ (ของเดิมลืม)
         $balance = $totalReceive - $totalPay;
 
         $expenses = (clone $query)
-            ->with('user:user_id,name') // ✅ ลดโหลด
+            ->with('user:user_id,name')
             ->latest()
-            ->simplePaginate(20)   // ✅ เร็วกว่า paginate
+            ->simplePaginate(20)
             ->withQueryString();
 
+        $report = DailyReport::latest()->first();
+        // dd($report);
         return view('commerce::commerce.report_sale', compact(
             'expenses',
             'totalReceive',
             'totalPay',
             'balance',
             'start',
-            'end'
+            'end',
+            'report'
         ));
+    }
+
+    public function saleListExcel(Request $request)
+    {
+        return Excel::download(
+            new SalefontExport($request),
+            'sale_list.xlsx'
+        );
     }
 
     // PDFFFFF
@@ -758,6 +794,7 @@ class CommerceController extends Controller
         $totalReceive = $expenses->where('type', 'receive')->sum(function ($item) {
             return $item->cash + $item->transfer;
         });
+        // dd($query);
 
         $totalPay = $expenses->where('type', 'pay')->sum(function ($item) {
             return $item->cash + $item->transfer;
@@ -768,7 +805,17 @@ class CommerceController extends Controller
         $start = $request->start ?? null;
         $end = $request->end ?? null;
 
-        $pdf = Pdf::loadView('commerce::commerce.sale_list_PDF', compact(
+        // ก่อนแก้ถ้ามีปัญหาอะไรก็ให้ใช้แบบเดิม
+        // $pdf = Pdf::loadView('commerce::commerce.sale_list_PDF', compact(
+        //     'expenses',
+        //     'totalReceive',
+        //     'totalPay',
+        //     'balance',
+        //     'start',
+        //     'end'
+        // ))->setPaper('a4', 'portrait');
+
+        $pdf = Pdf::loadView('commerce::commerce.report_sale_pdf', compact(
             'expenses',
             'totalReceive',
             'totalPay',
@@ -776,7 +823,6 @@ class CommerceController extends Controller
             'start',
             'end'
         ))->setPaper('a4', 'portrait');
-
         return $pdf->stream('report_sale.pdf');
     }
 
@@ -789,7 +835,6 @@ class CommerceController extends Controller
 
         return view('commerce::commerce.detil_sale', compact('sale', 'price', 'settings'));
     }
-
 
 
     public function reportSalePdf()
@@ -807,65 +852,156 @@ class CommerceController extends Controller
         $status = $request->status;
         $search = $request->search;
 
+        $start_date = $request->start_date;
+        $end_date   = $request->end_date;
+
         $query = Sale::query();
 
-        if ($request->filled('status')) {
+
+        if (!empty($status)) {
+
             $query->where('status', $status);
         }
 
-        if ($request->filled('search')) {
+        if (!empty($search)) {
+
             $query->where(function ($q) use ($search) {
+
                 $q->where('brand', 'like', "%{$search}%")
                     ->orWhere('model', 'like', "%{$search}%")
                     ->orWhere('serial_number', 'like', "%{$search}%")
+                    ->orWhere('running_no', 'like', "%{$search}%")
                     ->orWhere('note', 'like', "%{$search}%");
             });
         }
 
+        if (!empty($start_date) && !empty($end_date)) {
+
+            $query->whereBetween('created_at', [
+                $start_date . ' 00:00:00',
+                $end_date . ' 23:59:59'
+            ]);
+        } elseif (!empty($start_date)) {
+
+            $query->whereDate('created_at', '>=', $start_date);
+        } elseif (!empty($end_date)) {
+
+            $query->whereDate('created_at', '<=', $end_date);
+        }
+
         $total = (clone $query)->count();
 
-        $sales = $query->latest()
+        $sales = $query
+            ->latest()
             ->paginate(20)
             ->withQueryString();
 
-        return view('commerce::commerce.sale_list', compact('sales', 'status', 'search', 'total'));
+        return view(
+            'commerce::commerce.sale_list',
+            compact(
+                'sales',
+                'status',
+                'search',
+                'start_date',
+                'end_date',
+                'total'
+            )
+        );
+    }
+
+    public function reportSaleExcel(Request $request)
+    {
+
+        return Excel::download(
+            new ReportSaleExport($request),
+            'report_sale.xlsx'
+        );
     }
 
     public function saleListPdf(Request $request)
     {
-        $query = Expenses::query()
-            ->when($request->filled('status'), function ($q) use ($request) {
-                $q->where('type', $request->status);
-            })
-            ->when($request->filled('search'), function ($q) use ($request) {
-                $q->where('product', 'like', "%{$request->search}%");
-            });
+        $status = $request->status;
+        $search = $request->search;
 
-        $expenses = $query->with('user')
+        $start_date = $request->start_date;
+        $end_date   = $request->end_date;
+
+        $query = Sale::query()
+            ->with([
+                'user_r:user_id,name',
+                'member_r:member_id,fullname'
+            ]);
+
+        /*
+    |--------------------------------------------------------------------------
+    | Filter Status
+    |--------------------------------------------------------------------------
+    */
+
+        if (!empty($status)) {
+
+            $query->where('status', $status);
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | Search
+    |--------------------------------------------------------------------------
+    */
+
+        if (!empty($search)) {
+
+            $query->where(function ($q) use ($search) {
+
+                $q->where('brand', 'like', "%{$search}%")
+                    ->orWhere('model', 'like', "%{$search}%")
+                    ->orWhere('serial_number', 'like', "%{$search}%")
+                    ->orWhere('running_no', 'like', "%{$search}%")
+                    ->orWhere('note', 'like', "%{$search}%");
+            });
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | Date Filter
+    |--------------------------------------------------------------------------
+    */
+
+        if (!empty($start_date) && !empty($end_date)) {
+
+            $query->whereBetween('created_at', [
+                $start_date . ' 00:00:00',
+                $end_date . ' 23:59:59'
+            ]);
+        } elseif (!empty($start_date)) {
+
+            $query->whereDate('created_at', '>=', $start_date);
+        } elseif (!empty($end_date)) {
+
+            $query->whereDate('created_at', '<=', $end_date);
+        }
+
+        $sales = $query
             ->latest()
             ->get();
 
-        $totalReceive = $expenses->where('type', 'receive')->sum(function ($item) {
-            return $item->cash + $item->transfer;
+        $total = $sales->sum(function ($item) {
+
+            return ($item->cash ?? 0) + ($item->transfe ?? 0);
         });
 
-        $totalPay = $expenses->where('type', 'pay')->sum(function ($item) {
-            return $item->cash + $item->transfer;
-        });
-
-        $balance = $totalReceive - $totalPay;
-
-        $start = $request->start ?? null;
-        $end = $request->end ?? null;
-
-        $pdf = Pdf::loadView('commerce::commerce.sale_list_PDF', compact(
-            'expenses',
-            'totalReceive',
-            'totalPay',
-            'balance',
-            'start',
-            'end'
-        ))->setPaper('a4', 'portrait');
+        $pdf = Pdf::loadView(
+            'commerce::commerce.sale_list_PDF',
+            compact(
+                'sales',
+                'total',
+                'status',
+                'search',
+                'start_date',
+                'end_date'
+            )
+        )
+            ->setPaper('a4', 'portrait');
 
         return $pdf->stream('report_sale.pdf');
     }
@@ -982,5 +1118,127 @@ class CommerceController extends Controller
         $settings->phone = $request->phone;
         $settings->save();
         return back()->with('success', 'บันทึกการตั้งค่าเรียบร้อย');
+    }
+
+    public function closeDay(Request $request)
+    {
+        $result = DB::transaction(function () {
+
+            // 1. Query
+            $salesQuery = Sale::whereNull('daily_report_id');
+
+            $expensesQuery = Expenses::whereNull('daily_report_id');
+
+            // ไม่มีข้อมูล
+            if (
+                $salesQuery->count() === 0 &&
+                $expensesQuery->count() === 0
+            ) {
+
+                return [
+                    'error' => 'ไม่มีรายการค้างปิดยอดในขณะนี้'
+                ];
+            }
+
+            // 2. คำนวณยอด
+            $totalSales = (clone $salesQuery)
+                ->sum(DB::raw('transfer + cash'));
+
+            $totalExpenses = (clone $expensesQuery)
+                ->sum(DB::raw('transfer + cash'));
+
+            $netAmount = $totalSales + $totalExpenses;
+
+            // 3. สร้างรายงาน
+            $report = new DailyReport();
+
+            $report->report_date = now()->toDateString();
+
+            $report->total_sales = $totalSales;
+
+            $report->total_expenses = $totalExpenses;
+
+            $report->net_amount = $netAmount;
+
+            $report->user_id = auth()->user()->user_id;
+
+            $report->save();
+
+            // 4. update daily_report_id
+            $salesQuery->update([
+                'daily_report_id' => $report->id
+            ]);
+
+            $expensesQuery->update([
+                'daily_report_id' => $report->id
+            ]);
+
+            return [
+                'report_id' => $report->id,
+                'totalSales' => $totalSales,
+                'totalExpenses' => $totalExpenses,
+                'netAmount' => $netAmount,
+            ];
+        });
+
+        // error
+        if (isset($result['error'])) {
+
+            return back()->with(
+                'error',
+                $result['error']
+            );
+        }
+
+        $settings = Settings::first();
+
+        $fileName =
+            $settings->company_name .
+            '-' .
+            now()->format('Y-m-d') .
+            '.xlsx';
+
+        return Excel::download(
+            new ReportSaleMultiExport($request),
+            $fileName
+        );
+    }
+
+    public function daily_report_preview($id)
+    {
+        $report = DailyReport::findOrFail($id);
+        // dd($report->created_at); 
+        $sales = Sale::where('daily_report_id', $id)->get();
+        $expenses = Expenses::where('daily_report_id', $id)->get();
+
+        $pay = Expenses::where('daily_report_id', $id)->where('type', 'pay')->sum(DB::raw('cash + transfer'));
+        $receive = Expenses::where('daily_report_id', $id)->where('type', 'receive')->sum(DB::raw('cash + transfer'));
+
+        return view('commerce::commerce.daily_report_preview', compact('report', 'sales', 'expenses', 'pay', 'receive'));
+    }
+
+    public function daily_report_exportpdf($id)
+    {
+        // dd($id);
+        // ดึงข้อมูลสรุปยอด
+        $report = DailyReport::findOrFail($id);
+        // dd($report);
+
+        // ดึงรายการย่อยที่ผูกกับ Report นี้
+        // $sales = Sale::where('daily_report_id', $id)->get();
+        $expenses = Expenses::where('daily_report_id', $id)->get();
+
+        $data = [
+            'report' => $report,
+            // 'sales' => $sales,
+            'expenses' => $expenses,
+            'date' => Carbon::parse($report->report_date)->format('d/m/Y'),
+        ];
+
+        // โหลด View สำหรับทำ PDF (ต้องสร้างไฟล์ blade ในขั้นตอนถัดไป)
+        $pdf = Pdf::loadView('commerce::commerce.daily_report_exportpdf', $data);
+
+        // ตั้งชื่อไฟล์: report_2023-10-27.pdf
+        return $pdf->stream('report_' . $report->report_date . '.pdf');
     }
 }

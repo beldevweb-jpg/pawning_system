@@ -44,6 +44,7 @@
                     @endforeach
                 </div>
             @endif
+
             <div class="container">
                 @if ($sale_between)
                     <div class="card">
@@ -53,8 +54,8 @@
 
                             <!-- วาง -->
                             <label class="option">
-                                <input type="radio" name="action_type" value="wand"
-                                    {{ old('action_type', $sale->action_type ?? '') == 'wand' ? 'checked' : '' }}>
+                                <input type="radio" name="action_type" value="between" onchange="toggleModelField()"
+                                    {{ old('action_type', $sale->status ?? '') == 'between' ? 'checked' : '' }}>
                                 วาง
                             </label>
 
@@ -75,7 +76,7 @@
 
                             <!-- อื่นๆ -->
                             <label class="option">
-                                <input type="radio" id="action-other" name="action_type"
+                                <input type="radio" id="action-other" name="action_type" onchange="toggleModelField()"
                                     {{ old('action_type', $sale->action_type ?? '') == 'other' ? 'checked' : '' }}>
                                 อื่นๆ
                             </label>
@@ -117,13 +118,15 @@
                         </label>
                         <label class="option">
                             <input type="radio" id="type-other" name="type_category" value="other"
-                                onchange="toggleModelField()" {{ $sale->type_category == 'other' ? 'checked' : '' }}>
+                                onchange="toggleModelField()" {{ $sale->other_type != '' ? 'checked' : '' }}>
                             อื่นๆ
                         </label>
                     </div>
 
-                    <input class="input" id="type-other-input" name="other_type" value="{{ old('other_type') }}"
-                        placeholder="กรอกประเภทสินค้า" disabled>
+                    <input class="input" id="type-other-input" name="other_type"
+                        value="{{ old('other_type', $sale->other_type ?? '') }}" placeholder="กรอกประเภทสินค้า"
+                        onchange="toggleModelField()"
+                        {{ old('type_category', $sale->type_category ?? '') == 'other' ? '' : 'disabled' }}>
                 </div>
 
                 @php
@@ -220,61 +223,87 @@
                     <input class="input" name="note" type="text"
                         value="{{ old('note', $sale->note ?? '') }}">
                 </div>
+
                 <div class="card">
                     <div class="form-row">
                         <label>วันที่นัดรับเครื่อง</label>
+
                         <input class="input" name="appointment_date" type="date"
-                            value="{{ old('appointment_date', $sale->appointment_date?->format('Y-m-d')) }}">
+                            value="{{ old(
+                                'appointment_date',
+                                $sale->appointment_date ? $sale->appointment_date->format('Y-m-d') : now()->addDays(10)->format('Y-m-d'),
+                            ) }}">
                     </div>
-                    <div class="form-row">
-                        <label>รูปบัตรประชาชน</label>
-                        <input type="file" name="product_images" accept="image/*" capture="environment">
 
-                        <div style="margin-top:10px;">
+                    <div class="form-row">
+                        <div id="preview-product" class="img-grid">
+                            <label>รูปบัตรประชาชน</label>
+
+                            <input type="file" id="idcard-image" name="product_images" accept="image/*"
+                                capture="environment">
+
+                            <div id="preview-idcard"></div>
+
                             @if (!empty($sale->product_images))
-                                <img src="{{ asset('storage/' . $sale->product_images) }}"
-                                    style="width:80px; height:80px; object-fit:cover; border-radius:8px;">
-                            @else
-                                <span>ไม่มีรูป</span>
+                                <img src="{{ asset('storage/' . $sale->product_images) }}" style="width:80px;">
                             @endif
                         </div>
                     </div>
 
                     <div class="form-row">
-                        <label>รูปภาพคนถือสินค้า</label>
-                        <input type="file" name="product_images_behind" accept="image/*" capture="environment">
+                        <div id="preview-product" class="img-grid">
+                            <label>รูปภาพสินค้า (สูงสุด 4 รูป)</label>
+                            <input type="file" id="product-images-behind-input" name="product_images_behind[]"
+                                accept="image/*" capture="environment" multiple>
 
-                        <div style="margin-top:10px;">
-                            @if (!empty($sale->product_images_behind))
-                                <img src="{{ asset('storage/' . $sale->product_images_behind) }}"
-                                    style="width:80px; height:80px; object-fit:cover; border-radius:8px;">
-                            @else
-                                <span>ไม่มีรูป</span>
-                            @endif
+                            @php
+                                $images = $sale->product_images_behind;
+
+                                if (is_string($images)) {
+                                    $images = json_decode($images, true);
+                                }
+
+                                $images = $images ?? [];
+                            @endphp
+
+                            @foreach ($images as $img)
+                                <div class="img-box">
+                                    <img src="{{ asset('storage/' . $img) }}">
+                                </div>
+                            @endforeach
+
                         </div>
                     </div>
+
                     <div class="form-row">
-                        <label>รูปภาพใบเสร็จ</label>
-                        <input type="file" name="bill" id="bill-image" accept="image/*"
-                            capture="environment">
-                        <div id="preview-bill" style="display:flex; gap:10px; margin-top:10px;">
-                            @if (!empty($sale->bill))
-                                <img src="{{ asset('storage/' . $sale->bill) }}"
-                                    style="width:80px; height:80px; object-fit:cover; border-radius:8px;">
-                            @endif
+                        <div id="preview-product" class="img-grid">
+                            <label>รูปภาพใบเสร็จ</label>
+                            <input type="file" name="bill" id="bill-image" accept="image/*"
+                                capture="environment">
+                            <div id="preview-bill" style="display:flex; gap:10px; margin-top:10px;">
+                                @if (!empty($sale->bill))
+                                    <img src="{{ asset('storage/' . $sale->bill) }}"
+                                        style="width:80px; height:80px; object-fit:cover; border-radius:8px;">
+                                @endif
+                            </div>
                         </div>
                     </div>
-                    {{-- <div class="form-row">
-                        <label>ใบเสร็จหน้าร้าน</label>
-                        <input type="file" name="bill_QR_store" id="bill_QR_store-image" accept="image/*"
-                            capture="environment">
-                        <div id="preview-bill_QR_store" style="display:flex; gap:10px; margin-top:10px;">
-                            @if (!empty($sale->bill_QR_store))
-                                <img src="{{ asset('storage/' . $sale->bill_QR_store) }}"
-                                    style="width:80px; height:80px; object-fit:cover; border-radius:8px;">
-                            @endif
+
+                    @if (auth()->user()->role_id == '3')
+                        <div class="form-row">
+                            แก้ไขสถานะ
+                            <select name="status" class="input">
+                                <option value="between" {{ $sale->status == 'between' ? 'selected' : '' }}>จำอยู่
+                                </option>
+                                <option value="foreclosed" {{ $sale->status == 'foreclosed' ? 'selected' : '' }}>
+                                    ในสต๊อก</option>
+                                <option value="problem" {{ $sale->status == 'problem' ? 'selected' : '' }}>มีปัญหา
+                                </option>
+                                <option value="closed" {{ $sale->status == 'closed' ? 'selected' : '' }}>ปิด
+                                </option>
+                            </select>
                         </div>
-                    </div> --}}
+                    @endif
                 </div>
                 @if (!$isView)
                     <div class="submit">

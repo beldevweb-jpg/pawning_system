@@ -75,7 +75,9 @@ document.addEventListener("DOMContentLoaded", () => {
             modelWrapper.querySelectorAll('input[type="text"]').forEach(input => {
                 input.value = "";
             });
-            if (modelInput) modelInput.value = "";
+            modelWrapper.querySelectorAll('input[type="text"]').forEach(input => {
+                input.value = "";
+            });
         }
     }
 
@@ -187,74 +189,75 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
-const input = document.getElementById('idcardInput');
-const preview = document.getElementById('preview');
+/* =====================
+    8. รูปสินค้า สูงสุด 4 รูป
+===================== */
 
-input.addEventListener('change', function () {
+const productInput =
+    document.getElementById("product-images-behind-input");
 
-    preview.innerHTML = "";
+const productPreview =
+    document.getElementById("preview-product");
 
-    [...this.files].forEach((file, index) => {
+let filesArray = [];
 
-        const reader = new FileReader();
+if (productInput && productPreview) {
 
-        reader.onload = function (e) {
+    productInput.addEventListener("change", function (e) {
 
-            const box = document.createElement('div');
-            box.style.position = 'relative';
+        const newFiles = Array.from(e.target.files);
 
-            box.innerHTML = `
-                <img src="${e.target.result}"
-                     style="width:120px;height:80px;object-fit:cover;border-radius:8px;">
-                
-                <button type="button"
-                        onclick="removeImage(${index})"
-                        style="
-                            position:absolute;
-                            top:-5px;
-                            right:-5px;
-                            background:red;
-                            color:white;
-                            border:none;
-                            border-radius:50%;
-                            width:22px;
-                            height:22px;
-                            cursor:pointer;">
-                    x
-                </button>
-            `;
+        if ((filesArray.length + newFiles.length) > 4) {
 
-            preview.appendChild(box);
+            alert("อัปโหลดได้ไม่เกิน 4 รูป");
+            return;
         }
 
-        reader.readAsDataURL(file);
+        newFiles.forEach(file => {
+
+            filesArray.push(file);
+
+            const div = document.createElement("div");
+
+            const img = document.createElement("img");
+
+            img.src = URL.createObjectURL(file);
+
+            img.style.width = "100px";
+
+            const btn = document.createElement("button");
+
+            btn.type = "button";
+            btn.innerText = "ลบ";
+
+            btn.onclick = function () {
+
+                filesArray =
+                    filesArray.filter(f => f !== file);
+
+                div.remove();
+
+                updateInputFiles();
+            };
+
+            div.appendChild(img);
+            div.appendChild(btn);
+
+            productPreview.appendChild(div);
+        });
+
+        updateInputFiles();
     });
-});
 
-function removeImage(index) {
+    function updateInputFiles() {
 
-    const dt = new DataTransfer();
-    const files = input.files;
+        const dataTransfer = new DataTransfer();
 
-    for (let i = 0; i < files.length; i++) {
-        if (i !== index) {
-            dt.items.add(files[i]);
-        }
+        filesArray.forEach(file => {
+            dataTransfer.items.add(file);
+        });
+
+        productInput.files = dataTransfer.files;
     }
-
-    input.files = dt.files;
-    input.dispatchEvent(new Event('change'));
 }
 
-document.getElementById('interestInput')
-    .addEventListener('input', calculateTotalPay);
-
-function calculateTotalPay() {
-
-    const principal = parseFloat(document.getElementById('principalInput').value) || 0;
-    const interest = parseFloat(document.getElementById('interestInput').value) || 0;
-
-    const total = principal + interest;
-    window.onload = calculateTotalPay;
-    document.getElementById('totalInput').value = total.toFixed(2);
-}
